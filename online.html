@@ -1,0 +1,1737 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cẩm nang Xử lý Tình huống - Nhà hàng (Offline)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {theme:{extend:{colors:{primary:'#c0392b',secondary:'#f39c12',accent:'#27ae60',light:'#f8f9fa',dark:'#2c3e50'},fontFamily:{sans:['Inter','system-ui','sans-serif']}}}}
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&subset=vietnamese&display=swap" rel="stylesheet">
+    <style type="text/tailwindcss">
+        @layer utilities { .content-auto{content-visibility:auto} .card-hover{@apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;} .tag{@apply px-2 py-1 rounded-full text-xs font-medium;} }
+        mark{background:#fde68a;padding:0 2px;border-radius:3px}
+        @media print{header,footer,#filterBar,#statusBar,#situationList,#noResult,.no-print{display:none!important}#detailModal{position:static!important;background:none!important;display:block!important;padding:0!important}#detailModal>div{max-height:none!important;box-shadow:none!important}body{background:white!important}}
+.qn-brand{display:flex;align-items:center;gap:14px}
+.qn-title{display:flex;flex-direction:column;line-height:1.12;color:#1b5e20;font-weight:700}
+.qn-t1{font-size:13px;letter-spacing:.42em}
+.qn-t2{font-size:24px;white-space:nowrap}
+@media (max-width:480px){
+  .qn-brand{justify-content:center;gap:10px}
+  .qn-t1{font-size:clamp(11px,3.2vw,13px)}
+  .qn-t2{font-size:clamp(17px,5.4vw,22px)}
+}
+    </style>
+</head>
+<body class="bg-gray-50 font-sans text-dark">
+    <!-- Header -->
+    <header class="shadow-md sticky top-0 z-40" style="background:#ffffff;color:#1b5e20;border-bottom:3px solid #1b5e20">
+        <div class="container mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="qn-brand">
+                <img src="data:image/webp;base64,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" alt="Quê Nhà – Không gian ẩm thực Việt" style="height:56px;width:auto;background:#fff;border-radius:10px;padding:3px 6px;box-shadow:0 1px 3px rgba(0,0,0,.2);flex:none">
+                <h1 class="qn-title"><span class="qn-t1">CẨM NANG</span><span class="qn-t2">XỬ LÝ TÌNH HUỐNG</span></h1>
+            </div>
+
+            <!-- Tìm kiếm -->
+            <div class="w-full md:w-1/3 relative">
+                <input type="text" id="searchInput" style="border:1px solid #b7cdb9" placeholder="Tìm tình huống... (gõ không dấu cũng được)"
+                    class="w-full px-4 py-2 pr-10 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-secondary">
+                <button id="clearSearch" class="hidden absolute right-9 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" title="Xóa">
+                    <i class="fa fa-times-circle"></i>
+                </button>
+                <i class="fa fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- Thông tin trạng thái -->
+    <div class="container mx-auto px-4 py-3">
+        <div id="statusBar" class="bg-blue-50 border-l-4 border-blue-500 p-3 rounded-r mb-6">
+            <p class="text-sm text-blue-700">
+                <i class="fa fa-info-circle mr-1"></i>
+                Đang hiển thị <span id="shownCount" class="font-semibold">0</span> / <span id="totalCount">0</span> tình huống — Chọn nhóm để lọc, gõ từ khóa để tìm nhanh
+            </p>
+        </div>
+
+        <!-- Bộ lọc nhóm -->
+        <div id="filterBar" class="flex flex-wrap gap-2 mb-6">
+            <button class="filter-btn px-4 py-2 rounded-full text-sm font-medium" data-group="all">Tất cả</button>
+            <button class="filter-btn px-4 py-2 rounded-full text-sm font-medium" data-group="phucvu">🧑‍🤝‍🧑 Phục vụ & Tiếp nhận</button>
+            <button class="filter-btn px-4 py-2 rounded-full text-sm font-medium" data-group="chatluong">🍽️ Chất lượng món & đồ uống</button>
+            <button class="filter-btn px-4 py-2 rounded-full text-sm font-medium" data-group="thanhtoan">💵 Thanh toán & Giá</button>
+            <button class="filter-btn px-4 py-2 rounded-full text-sm font-medium" data-group="hanhvi">😤 Hành vi khách</button>
+            <button class="filter-btn px-4 py-2 rounded-full text-sm font-medium" data-group="antoan">🚨 An toàn & Khẩn cấp</button>
+        </div>
+
+        <!-- Danh sách tình huống -->
+        <div id="situationList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <!-- Được điền bằng JavaScript -->
+        </div>
+
+        <!-- Khi không có kết quả tìm kiếm -->
+        <div id="noResult" class="hidden py-10 text-center text-gray-500">
+            <i class="fa fa-search text-4xl mb-3"></i>
+            <p class="text-lg">Không tìm thấy tình huống phù hợp</p>
+            <p class="text-sm mt-1">Thử từ khóa khác hoặc chọn nhóm khác</p>
+        </div>
+
+        <noscript>
+            <p class="text-center text-red-600 py-6">Trình duyệt đang tắt JavaScript. Hãy bật JavaScript để xem cẩm nang.</p>
+        </noscript>
+    </div>
+
+    <!-- Chi tiết tình huống (Modal) -->
+    <div id="detailModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="bg-white rounded-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div class="sticky top-0 bg-white border-b p-4 flex justify-between items-start gap-4 z-10">
+                <h2 id="modalTitle" class="text-xl font-bold text-dark"></h2>
+                <div class="flex items-center gap-3 shrink-0 no-print">
+                    <button id="printBtn" class="text-gray-500 hover:text-gray-700" title="In tình huống này">
+                        <i class="fa fa-print text-lg"></i>
+                    </button>
+                    <button id="closeModal" class="text-gray-500 hover:text-gray-700 text-xl" title="Đóng (Esc)">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="modalContent" class="p-5">
+                <!-- Nội dung chi tiết được điền bằng JS -->
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white/70 py-6 mt-12">
+        <div class="container mx-auto px-4 text-center text-sm">
+            <p>Cẩm nang Xử lý Tình huống Nhà hàng — Phiên bản 1.1</p>
+            <p class="mt-1">Dùng cho đào tạo & tra cứu nội bộ — Cập nhật thường xuyên</p>
+        </div>
+    </footer>
+
+    <script>
+        // DANH SÁCH TÌNH HUỐNG DỮ LIỆU CHÍNH
+        const situations = [
+            // Nhóm 1: Phục vụ & Tiếp nhận
+            {
+                id: 1,
+                group: "phucvu",
+                title: "Khách chờ bàn quá lâu, bực bội",
+                summary: "Khách đến nhưng phải chờ lâu, có biểu hiện không hài lòng",
+                tags: ["thường gặp", "tiếp nhận"],
+                content: {
+                    background: "Xảy ra vào giờ cao điểm, cuối tuần hoặc khi có sự kiện đặc biệt",
+                    cause: "Bàn giải phóng chậm, thiếu nhân viên, dự đoán sai lượng khách",
+                    steps: [
+                        "Tiếp cận ngay, mỉm cười, xin lỗi trước — không đổ lỗi",
+                        "Thông báo thời gian chờ CHÍNH XÁC, không nói chung chung",
+                        "Đề xuất giải pháp: nước miễn phí trong khi chờ / ngồi quầy / ưu tiên bàn khác",
+                        "Ghi nhận tên & số điện thoại, gọi đúng theo thứ tự",
+                        "Sau khi có bàn, hướng dẫn nhanh và xin lỗi thêm một lần"
+                    ],
+                    speech: "\"Em xin lỗi quý khách rất nhiều. Hiện tại phải chờ thêm khoảng 10–15 phút. Trong khi chờ mời quý khách nhận nước mát miễn phí nhé! Khi có bàn chúng tôi mời ngay.\"",
+                    avoid: ["Nói \"Đông khách thì phải chờ thôi\"", "Bỏ mặc khách chờ không thông báo", "Để khách đứng chờ lâu không mời ngồi tạm"],
+                    responsible: "Nhân viên tiếp tân / Phục vụ",
+                    prevent: "Cập nhật thời gian chờ liên tục; có khu vực chờ với nước uống miễn phí; giới hạn số lượng khách vào giờ cao điểm"
+                }
+            },
+            {
+                id: 2,
+                group: "phucvu",
+                title: "Khách đặt bàn nhưng hệ thống không có thông tin",
+                summary: "Khách đã đặt bàn trước nhưng không tìm thấy trong sổ/danh sách",
+                tags: ["trung bình"],
+                content: {
+                    background: "Lỗi nhập liệu, hệ thống mất kết nối, đặt bàn qua điện thoại không ghi nhận",
+                    cause: "Lỗi nhân viên, lỗi hệ thống, hiểu nhầm thông tin",
+                    steps: [
+                        "Xin lỗi ngay, không tranh cãi về việc có đặt hay không",
+                        "Xác nhận thông tin: tên, số người, giờ đặt, người tiếp nhận",
+                        "Tìm giải pháp bàn ngay hoặc xếp vào hàng ưu tiên đầu tiên",
+                        "Nếu phải chờ — tặng nước/trà miễn phí, có thể giảm giá hoặc tặng món",
+                        "Ghi nhận lại thông tin & báo quản lý lỗi hệ thống"
+                    ],
+                    speech: "\"Em xin lỗi quý khách, để em kiểm tra lại ngay. Bàn sẽ có trong khoảng 5 phút, mời quý khách ngồi tạm. Chúng tôi sẽ ưu tiên phục vụ ngay.\"",
+                    avoid: ["Nói \"Chúng tôi không có thông tin, chắc quý khách gọi nhầm\"", "Để khách chờ không có giải pháp"],
+                    responsible: "Tiếp tân / Quản lý ca",
+                    prevent: "Xác nhận lại đặt bàn qua tin nhắn/Zalo; in phiếu xác nhận; kiểm tra hệ thống thường xuyên"
+                }
+            },
+            {
+                id: 3,
+                group: "phucvu",
+                title: "Khách yêu cầu đổi bàn sau khi đã ngồi",
+                summary: "Khách đã ngồi nhưng muốn chuyển sang bàn khác",
+                tags: ["thường gặp"],
+                content: {
+                    background: "Bàn không gần cửa sổ / không đủ ánh sáng / quá gần lối đi",
+                    cause: "Không hiểu mong muốn khách lúc nhận bàn, hoặc khách thay đổi ý kiến",
+                    steps: [
+                        "Kiểm tra ngay xem có bàn phù hợp trống không",
+                        "Có → hướng dẫn chuyển bàn nhanh, chuyển đồ uống/món đang có",
+                        "Không có → giải thích lịch sự, hứa đổi ngay khi có bàn trống",
+                        "Ghi nhớ yêu cầu, ưu tiên chuyển khi có bàn",
+                        "Cảm ơn sự thông cảm của khách"
+                    ],
+                    speech: "\"Được ạ, em kiểm tra giúp ngay. Bàn gần cửa sổ sẽ có trong 5 phút, quý khách chờ chút nhé em chuyển đồ giúp luôn.\"",
+                    avoid: ["Nói \"Đã ngồi rồi thì không đổi được\"", "Phớt lờ yêu cầu khách"],
+                    responsible: "Nhân viên phục vụ",
+                    prevent: "Hỏi rõ yêu cầu vị trí khi nhận bàn; giới thiệu ưu/nhược điểm từng bàn trước khi khách chọn"
+                }
+            },
+            {
+                id: 4,
+                group: "phucvu",
+                title: "Khách đến đông hơn số lượng đã đặt",
+                summary: "Khách đến nhiều hơn thông tin đặt bàn trước",
+                tags: ["thường gặp"],
+                content: {
+                    background: "Bạn bè thêm người, gia đình có người đi cùng bất ngờ",
+                    cause: "Không cập nhật thông tin thay đổi, hoặc thông báo muộn",
+                    steps: [
+                        "Chào đón thân thiện, không thể hiện khó chịu",
+                        "Kiểm tra khả năng điều chỉnh bàn: mở rộng, ghép bàn, chuyển bàn lớn hơn",
+                        "Nếu không đủ chỗ — thông báo rõ, đề xuất giải pháp: chờ, chia nhóm, hoặc đến lúc khác",
+                        "Thông báo bếp để chuẩn bị thêm dụng cụ, đồ ăn kịp thời",
+                        "Ghi nhận thay đổi vào hệ thống"
+                    ],
+                    speech: "\"Chào quý khách ạ! Để em điều chỉnh bàn rộng hơn cho đủ người nhé, chỉ mất chút xíu thôi ạ.\"",
+                    avoid: ["Nói \"Đặt bao nhiêu thì đến bấy nhiêu chứ\"", "Bắt khách trả thêm tiền trước khi giải quyết chỗ ngồi"],
+                    responsible: "Tiếp tân / Quản lý ca",
+                    prevent: "Hỏi lại số lượng người trước giờ hẹn; chuẩn bị sẵn bàn dự phòng cho trường hợp tăng người"
+                }
+            },
+
+            // Nhóm 2: Chất lượng món
+            {
+                id: 5,
+                group: "chatluong",
+                title: "Món mang ra sai yêu cầu / sai chế độ ăn",
+                summary: "Món phục vụ không đúng yêu cầu hoặc không phù hợp chế độ ăn của khách",
+                tags: ["quan trọng", "thường gặp"],
+                content: {
+                    background: "Khách có yêu cầu đặc biệt: không hành, ít đường, không ăn hải sản, ăn chay...",
+                    cause: "Ghi nhận thiếu chính xác, thông tin không đến bếp, nhầm lẫn bàn",
+                    steps: [
+                        "Xin lỗi ngay — không tranh cãi, không đổ lỗi",
+                        "Giữ món sai lại, không ép khách dùng hoặc trả về",
+                        "Báo bếp làm lại ĐÚNG yêu cầu, đánh dấu ưu tiên",
+                        "Thông báo thời gian chờ chính xác cho khách",
+                        "Đề xuất nước/món nhỏ miễn phí trong khi chờ",
+                        "Kiểm tra kỹ trước khi mang ra lần sau"
+                    ],
+                    speech: "\"Em xin lỗi quý khách rất nhiều, đây là lỗi của chúng tôi. Em sẽ báo bếp làm lại đúng yêu cầu ngay, chỉ khoảng 8 phút ạ. Mời quý khách nhận nước mát trong khi chờ.\"",
+                    avoid: ["Nói \"Đây là món quý khách gọi mà\"", "Yêu cầu khách trả tiền món sai", "Mang ra món mới mà không kiểm tra lại"],
+                    responsible: "Người phục vụ / Bếp trưởng",
+                    prevent: "Xác nhận lại yêu cầu đặc biệt với khách khi ghi đơn; đánh dấu đơn có yêu cầu đặc biệt bằng màu sắc riêng; kiểm tra món trước khi mang ra"
+                }
+            },
+            {
+                id: 6,
+                group: "chatluong",
+                title: "Khách phản ánh món không ngon / không hợp khẩu vị",
+                summary: "Khách nói món không ngon, quá mặn/ngọt, hoặc có mùi vị lạ",
+                tags: ["thường gặp"],
+                content: {
+                    background: "Vị cá nhân khác nhau, hoặc chất lượng món thực sự không ổn",
+                    cause: "Chế biến không theo chuẩn, nguyên liệu không tốt, hoặc khác khẩu vị khách",
+                    steps: [
+                        "Lắng nghe hoàn chỉnh, không ngắt lời, không biện minh ngay",
+                        "Xác nhận cảm nhận khách: \"Em hiểu ý quý khách\"",
+                        "Không phân biệt \"không ngon\" vs \"không đúng chuẩn\" trước mặt khách",
+                        "Đề xuất giải pháp: thay món khác / giảm giá / hoàn tiền phần đó",
+                        "Báo quản lý & thông tin cho bếp trưởng xem xét cải thiện"
+                    ],
+                    speech: "\"Cảm ơn quý khách đã chia sẻ, em xin lỗi vì trải nghiệm này không tốt. Quý khách muốn thay món khác hay chúng tôi điều chỉnh giúp quý khách ạ?\"",
+                    avoid: ["Nói \"Món này vẫn bán rất tốt mà\"", "Phớt lờ phản hồi", "Bảo khách ăn cho quen"],
+                    responsible: "Nhân viên phục vụ / Quản lý",
+                    prevent: "Đào tạo chuẩn vị món; kiểm tra chất lượng mỗi lô nguyên liệu; lắng nghe mọi phản hồi dù nhỏ"
+                }
+            },
+            {
+                id: 7,
+                group: "chatluong",
+                title: "Món ra không đồng bộ — người có người chưa",
+                summary: "Trong nhóm khách, một số đã có món, số khác vẫn chờ",
+                tags: ["thường gặp"],
+                content: {
+                    background: "Nhóm đông người, gọi nhiều món có thời gian chế biến khác nhau",
+                    cause: "Bếp không phối hợp ra món theo bàn, phục vụ không theo dõi đơn",
+                    steps: [
+                        "Chủ động xin lỗi cả bàn, không đợi khách hỏi mới trả lời",
+                        "Kiểm tra với bếp thời gian CHÍNH XÁC của các món còn thiếu",
+                        "Đề nghị bếp ưu tiên hoàn tất đơn của bàn này",
+                        "Hỏi khách muốn dùng trước hay giữ ấm/hâm lại món đã ra để ăn cùng",
+                        "Khi đủ món, quay lại kiểm tra cả bàn đã hài lòng chưa"
+                    ],
+                    speech: "\"Em xin lỗi cả bàn mình, hai món còn lại sẽ ra trong khoảng 5 phút nữa, em đã báo bếp ưu tiên rồi ạ. Nếu quý khách muốn chờ ăn cùng, em hâm nóng lại các món đã ra giúp nhé.\"",
+                    avoid: ["Nói \"Bếp đang làm, quý khách chờ đi\"", "Không cập nhật cho khách đang chờ món", "Mang món ra lần lượt mà không giải thích"],
+                    responsible: "Phục vụ / Bếp trưởng / Người điều phối ra món",
+                    prevent: "Khi ghi đơn hỏi khách muốn ra món cùng lúc hay lần lượt; bếp ra món theo bàn; phục vụ theo dõi đơn quá 15 phút"
+                }
+            },
+            {
+                id: 8,
+                group: "chatluong",
+                title: "Phát hiện dị vật trong món (tóc, côn trùng, nilon...)",
+                summary: "Khách tìm thấy vật lạ trong món ăn hoặc đồ uống",
+                tags: ["quan trọng"],
+                content: {
+                    background: "Có thể xảy ra bất cứ lúc nào, ảnh hưởng nghiêm trọng đến uy tín nhà hàng",
+                    cause: "Vệ sinh khu bếp chưa đạt, nhân viên bếp không đội mũ/đeo găng, nguyên liệu không được sơ chế kỹ",
+                    steps: [
+                        "Xin lỗi chân thành ngay lập tức, không nghi ngờ hay chất vấn khách",
+                        "Thu món ngay khỏi bàn, giữ lại món để kiểm tra nội bộ",
+                        "Báo quản lý ca ra trực tiếp xin lỗi khách",
+                        "Đề xuất làm món mới hoặc đổi món khác — món lỗi không tính tiền",
+                        "Cân nhắc tặng món/giảm giá để bù đắp trải nghiệm",
+                        "Lập biên bản nội bộ, truy nguyên nguyên nhân tại bếp"
+                    ],
+                    speech: "\"Em thành thật xin lỗi quý khách, đây là lỗi nghiêm trọng của chúng tôi. Em xin phép thu món này và làm lại món mới ngay, món này nhà hàng không tính tiền ạ. Quản lý của em sẽ ra gặp quý khách.\"",
+                    avoid: ["Nói \"Chắc không phải của bếp đâu\"", "Lấy tay nhặt dị vật ra rồi để món lại", "Tranh cãi trước mặt các bàn khác"],
+                    responsible: "Phục vụ / Quản lý ca / Bếp trưởng",
+                    prevent: "Bắt buộc mũ, khẩu trang, găng tay trong bếp; kiểm tra món tại quầy ra món; vệ sinh, diệt côn trùng định kỳ"
+                }
+            },
+            {
+                id: 9,
+                group: "chatluong",
+                title: "Món ra quá chậm, khách hối thúc nhiều lần",
+                summary: "Khách đã gọi món lâu nhưng vẫn chưa có, bắt đầu khó chịu",
+                tags: ["thường gặp"],
+                content: {
+                    background: "Giờ cao điểm, bếp quá tải, món cần chế biến lâu",
+                    cause: "Đơn bị sót, bếp thiếu người, phục vụ không báo trước thời gian chế biến",
+                    steps: [
+                        "Xin lỗi và kiểm tra ngay đơn của bàn tại bếp (có bị sót không)",
+                        "Báo khách thời gian cụ thể, không nói \"sắp có rồi\"",
+                        "Nếu đơn bị sót → báo bếp làm ưu tiên, thông báo trung thực với khách",
+                        "Tặng món khai vị/nước trong khi chờ nếu chậm quá 20 phút",
+                        "Quay lại cập nhật cho khách trước khi khách phải hỏi lần nữa"
+                    ],
+                    speech: "\"Em xin lỗi để quý khách chờ lâu. Em vừa kiểm tra, món của mình sẽ ra trong 7 phút nữa. Em mời quý khách dùng thêm đĩa khai vị trong khi chờ ạ.\"",
+                    avoid: ["Nói \"Sắp có rồi\" nhiều lần mà không kiểm tra", "Tránh mặt bàn khách đang chờ", "Đổ lỗi cho bếp trước mặt khách"],
+                    responsible: "Phục vụ / Bếp trưởng",
+                    prevent: "Báo trước thời gian chế biến món lâu khi khách gọi; dùng hệ thống theo dõi thời gian đơn; tăng người giờ cao điểm"
+                }
+            },
+
+            {
+                id: 30,
+                group: "chatluong",
+                title: "Món khách gọi đã hết",
+                summary: "Khách đã gọi món nhưng bếp báo hết nguyên liệu hoặc ngừng phục vụ món đó",
+                tags: ["thường gặp", "mới"],
+                content: {
+                    background: "Cuối ca, cuối tuần đông khách, món theo mùa hoặc nguyên liệu giao thiếu",
+                    cause: "Bếp không báo kịp danh sách món hết, phục vụ không kiểm tra trước khi ghi đơn",
+                    steps: [
+                        "Báo khách NGAY khi biết món hết, không để khách chờ rồi mới báo",
+                        "Xin lỗi ngắn gọn, nói rõ là món đã hết, không đổ lỗi cho bếp",
+                        "Gợi ý 2–3 món thay thế cùng kiểu (cùng nguyên liệu chính, cùng cách chế biến, giá tương đương)",
+                        "Nếu khách đã chờ lâu → báo bếp ưu tiên món thay thế, có thể tặng nước hoặc món nhỏ",
+                        "Nếu món thay thế đắt hơn → quản lý ca quyết định có giữ giá món cũ không",
+                        "Báo ngay cho các phục vụ khác và cập nhật bảng món hết để không ghi đơn sai tiếp"
+                    ],
+                    speech: "\"Em xin lỗi anh/chị, món cá hấp hôm nay vừa hết ạ. Bên em có cá chiên sả hoặc cá kho tộ cũng rất được khách gọi, anh/chị muốn thử món nào ạ?\"",
+                    avoid: ["Báo hết món sau khi khách đã chờ 15–20 phút", "Tự ý thay món khác mà không hỏi khách", "Nói \"Hết rồi, gọi món khác đi\""],
+                    responsible: "Nhân viên phục vụ / Bếp trưởng / Quản lý ca",
+                    prevent: "Bếp báo danh sách món sắp hết đầu ca và khi còn ít; bảng \"Món hết hôm nay\" ở quầy; phục vụ kiểm tra bảng trước khi ghi đơn"
+                }
+            },
+
+            // Nhóm 3: Thanh toán & Giá
+            {
+                id: 10,
+                group: "thanhtoan",
+                title: "Hóa đơn tính sai tiền",
+                summary: "Khách phát hiện hóa đơn có món không gọi hoặc tính sai số lượng/giá",
+                tags: ["quan trọng", "thường gặp"],
+                content: {
+                    background: "Thường xảy ra khi bàn đông người, gọi thêm nhiều lần hoặc chuyển bàn",
+                    cause: "Nhập nhầm bàn, nhập trùng món, chưa xóa món đã hủy",
+                    steps: [
+                        "Cảm ơn khách đã kiểm tra, xin lỗi ngay",
+                        "Cùng khách đối chiếu từng món trên hóa đơn một cách bình tĩnh",
+                        "Sai → điều chỉnh ngay, in hóa đơn mới",
+                        "Chưa rõ → nhờ quản lý kiểm tra đơn gốc, ưu tiên lợi ích khách nếu không xác minh được",
+                        "Xin lỗi lần nữa khi trả hóa đơn đúng"
+                    ],
+                    speech: "\"Cảm ơn quý khách đã kiểm tra giúp ạ. Em xin lỗi, đúng là có nhầm món này. Em điều chỉnh và in lại hóa đơn ngay cho quý khách.\"",
+                    avoid: ["Nói \"Máy tính không sai được đâu\"", "Tỏ thái độ khi khách kiểm tra hóa đơn", "Để khách chờ lâu mà không giải quyết"],
+                    responsible: "Thu ngân / Phục vụ / Quản lý ca",
+                    prevent: "Đọc lại đơn với khách khi ghi món; hủy món đã hủy ngay trên hệ thống; kiểm tra hóa đơn trước khi đưa khách"
+                }
+            },
+            {
+                id: 11,
+                group: "thanhtoan",
+                title: "Khách phàn nàn giá cao / phụ thu không báo trước",
+                summary: "Khách bất ngờ với giá món, phí phục vụ, VAT hoặc phụ thu ngày lễ",
+                tags: ["trung bình"],
+                content: {
+                    background: "Món tính theo cân (hải sản), phí phục vụ, VAT, phụ thu lễ Tết",
+                    cause: "Không thông báo rõ khi khách gọi món, thực đơn không ghi rõ",
+                    steps: [
+                        "Lắng nghe, không tranh cãi về việc \"giá đã ghi trên menu\"",
+                        "Giải thích rõ ràng từng khoản: giá món, cân nặng, phí, thuế",
+                        "Nếu nhân viên KHÔNG báo trước giá theo cân/phụ thu → nhờ quản lý xem xét giảm/miễn",
+                        "Ghi nhận phản hồi để cải thiện cách thông báo"
+                    ],
+                    speech: "\"Em xin phép giải thích từng khoản giúp quý khách ạ. Nếu lúc gọi món chúng em chưa báo rõ, em xin lỗi và sẽ báo quản lý xem xét cho mình ngay.\"",
+                    avoid: ["Nói \"Menu ghi rõ rồi mà\"", "Nói giọng mỉa mai về giá", "Từ chối giải thích"],
+                    responsible: "Phục vụ / Thu ngân / Quản lý",
+                    prevent: "Báo giá & cân nặng trước khi chế biến món theo cân; ghi rõ phí phục vụ/VAT/phụ thu trên menu và tại cửa"
+                }
+            },
+            {
+                id: 12,
+                group: "thanhtoan",
+                title: "Máy quẹt thẻ lỗi / chuyển khoản chưa nhận được",
+                summary: "Thanh toán không thành công hoặc khách báo đã chuyển nhưng chưa thấy tiền",
+                tags: ["thường gặp"],
+                content: {
+                    background: "Mất mạng, máy POS lỗi, ngân hàng chậm xử lý",
+                    cause: "Sự cố kỹ thuật, khách chuyển sai thông tin tài khoản, giao dịch treo",
+                    steps: [
+                        "Xin lỗi vì sự bất tiện, giữ thái độ bình tĩnh — không nghi ngờ khách",
+                        "Thẻ lỗi → thử lại một lần, kiểm tra kết nối, đề xuất cách thanh toán khác",
+                        "Chuyển khoản → nhờ khách cho xem màn hình giao dịch thành công (mã giao dịch, số tài khoản nhận)",
+                        "Đối chiếu đúng tài khoản nhà hàng; nếu đúng → ghi lại thông tin, có thể cho khách về và theo dõi",
+                        "Báo quản lý xử lý các giao dịch treo, không tự ý cho khách chuyển lần 2"
+                    ],
+                    speech: "\"Em xin lỗi, hệ thống đang chậm chút ạ. Quý khách cho em xem giúp màn hình giao dịch để em ghi nhận nhé, em không muốn quý khách phải chờ lâu.\"",
+                    avoid: ["Bắt khách chuyển lại khi chưa xác minh", "Nói \"Chưa thấy tiền thì chưa được về\" với giọng nghi ngờ", "Quẹt thẻ nhiều lần liên tiếp"],
+                    responsible: "Thu ngân / Quản lý ca",
+                    prevent: "Có máy POS dự phòng; dùng mã QR có thông báo tức thì; kiểm tra kết nối đầu ca"
+                }
+            },
+            {
+                id: 13,
+                group: "thanhtoan",
+                title: "Khách muốn chia hóa đơn nhiều phần",
+                summary: "Nhóm khách yêu cầu tách hóa đơn theo người hoặc theo món",
+                tags: ["thường gặp"],
+                content: {
+                    background: "Nhóm bạn, đồng nghiệp đi ăn chung, mỗi người trả phần mình",
+                    cause: "Nhu cầu bình thường của khách, nhưng hệ thống/nhân viên chưa chuẩn bị",
+                    steps: [
+                        "Vui vẻ nhận yêu cầu, hỏi rõ cách chia: theo món hay chia đều",
+                        "Tách hóa đơn trên hệ thống, đọc lại từng phần cho khách xác nhận",
+                        "Món dùng chung → hỏi khách muốn chia đều hay ghi vào phần ai",
+                        "Thanh toán lần lượt, đưa đúng hóa đơn cho từng người"
+                    ],
+                    speech: "\"Dạ được ạ! Quý khách muốn chia theo món từng người gọi hay chia đều tổng hóa đơn ạ?\"",
+                    avoid: ["Nói \"Nhà hàng không chia hóa đơn được\"", "Tỏ ra phiền hà khi khách yêu cầu"],
+                    responsible: "Thu ngân / Phục vụ",
+                    prevent: "Hỏi trước khi in hóa đơn với nhóm đông; đào tạo thao tác tách hóa đơn trên hệ thống"
+                }
+            },
+            {
+                id: 14,
+                group: "thanhtoan",
+                title: "Khách rời đi mà chưa thanh toán",
+                summary: "Phát hiện bàn trống nhưng hóa đơn chưa được thanh toán",
+                tags: ["quan trọng"],
+                content: {
+                    background: "Giờ cao điểm, nhân viên không để ý, khách quên hoặc cố ý",
+                    cause: "Khu vực bàn khuất, không có người theo dõi lối ra, khách nghĩ người khác đã trả",
+                    steps: [
+                        "Bình tĩnh — luôn giả định khách quên, không phải cố ý",
+                        "Nếu khách còn gần → nhẹ nhàng nhắc, không la lớn hay giữ người",
+                        "Kiểm tra với các bàn/thành viên khác xem có ai đã thanh toán chưa",
+                        "Nếu có thông tin đặt bàn → liên hệ lịch sự qua điện thoại",
+                        "Báo quản lý, ghi nhận sự việc; KHÔNG trừ lương nhân viên tự ý"
+                    ],
+                    speech: "\"Anh/chị ơi, em xin lỗi làm phiền ạ, hình như bàn mình chưa thanh toán, quý khách xem giúp em với ạ.\"",
+                    avoid: ["Đuổi theo, la lớn, nắm tay giữ khách", "Buộc tội khách là \"ăn quỵt\"", "Đăng hình khách lên mạng xã hội"],
+                    responsible: "Phục vụ / Quản lý ca",
+                    prevent: "Bố trí người quan sát lối ra; đưa hóa đơn khi khách dùng xong; với nhóm đông có thể thanh toán trước"
+                }
+            },
+
+            // Nhóm 4: Hành vi khách
+            {
+                id: 15,
+                group: "hanhvi",
+                title: "Khách say xỉn, nói lớn, làm phiền bàn khác",
+                summary: "Khách uống nhiều, gây ồn ào hoặc có lời lẽ khó nghe",
+                tags: ["quan trọng"],
+                content: {
+                    background: "Tiệc nhậu, liên hoan buổi tối, cuối tuần",
+                    cause: "Uống quá nhiều, nhân viên tiếp tục phục vụ rượu bia khi khách đã say",
+                    steps: [
+                        "Giữ bình tĩnh, nói chuyện nhẹ nhàng với người tỉnh táo nhất trong nhóm",
+                        "Lịch sự nhắc nhỏ tiếng vì có các bàn khác",
+                        "Ngừng phục vụ thêm rượu bia, mời nước lọc/trà/món ăn nhẹ",
+                        "Đề xuất chuyển sang khu vực riêng nếu có",
+                        "Nếu tình hình xấu đi → báo quản lý/bảo vệ; có dấu hiệu bạo lực → gọi 113",
+                        "Khi về, gợi ý gọi taxi/xe công nghệ, không để khách say tự lái xe"
+                    ],
+                    speech: "\"Anh ơi, em xin phép nhờ anh giúp bàn mình nói nhỏ chút ạ, bên cạnh có gia đình có em bé. Em mời bàn mình thêm ấm trà nóng nhé.\"",
+                    avoid: ["Cãi tay đôi, dùng lời lẽ thách thức", "Tiếp tục bán thêm rượu khi khách đã say", "Đụng chạm cơ thể khách"],
+                    responsible: "Phục vụ / Quản lý ca / Bảo vệ",
+                    prevent: "Đào tạo nhận biết dấu hiệu say; quy định dừng phục vụ rượu; bố trí khu vực riêng cho tiệc nhậu"
+                }
+            },
+            {
+                id: 16,
+                group: "hanhvi",
+                title: "Khách quấy rối, có lời lẽ hoặc hành vi không đúng mực với nhân viên",
+                summary: "Khách trêu ghẹo, đụng chạm, xúc phạm nhân viên",
+                tags: ["quan trọng"],
+                content: {
+                    background: "Có thể xảy ra với mọi nhân viên, đặc biệt nhân viên trẻ",
+                    cause: "Khách say, thiếu tôn trọng, không có quy định rõ ràng bảo vệ nhân viên",
+                    steps: [
+                        "Nhân viên được phép rời bàn ngay, không phải chịu đựng",
+                        "Báo quản lý ca ngay lập tức",
+                        "Quản lý thay nhân viên phục vụ bàn đó, nhắc nhở khách rõ ràng, lịch sự",
+                        "Nếu khách tiếp tục → từ chối phục vụ, mời khách thanh toán và ra về",
+                        "Hành vi nghiêm trọng (đụng chạm, đe dọa) → giữ camera, có thể báo công an 113",
+                        "Hỏi thăm, hỗ trợ tinh thần cho nhân viên sau sự việc"
+                    ],
+                    speech: "(Quản lý) \"Thưa anh, nhân viên của chúng tôi cần được tôn trọng. Nếu hành vi này tiếp tục, chúng tôi rất tiếc sẽ phải ngừng phục vụ bàn mình.\"",
+                    avoid: ["Bảo nhân viên \"cố chịu, khách là thượng đế\"", "Bỏ qua vì sợ mất khách", "Đổ lỗi cho nhân viên"],
+                    responsible: "Quản lý ca / Bảo vệ",
+                    prevent: "Có quy định rõ: nhân viên được bảo vệ; phổ biến quy trình báo cáo; lắp camera khu vực phục vụ"
+                }
+            },
+            {
+                id: 17,
+                group: "hanhvi",
+                title: "Khách đòi gặp quản lý, dọa đánh giá xấu trên mạng",
+                summary: "Khách rất bức xúc, đe dọa đăng review 1 sao, bóc phốt",
+                tags: ["trung bình"],
+                content: {
+                    background: "Sau một chuỗi trải nghiệm không tốt hoặc một lỗi lớn",
+                    cause: "Vấn đề chưa được giải quyết thỏa đáng ở cấp nhân viên",
+                    steps: [
+                        "Nhân viên báo quản lý ngay, không tự hứa hẹn vượt thẩm quyền",
+                        "Quản lý đến nhanh, mời khách sang khu vực yên tĩnh nói chuyện",
+                        "Lắng nghe toàn bộ, ghi chép, không ngắt lời",
+                        "Thừa nhận phần lỗi của nhà hàng, đưa ra giải pháp cụ thể",
+                        "Không cố gắng ngăn khách đánh giá — tập trung giải quyết vấn đề",
+                        "Nếu khách đã đăng review → trả lời công khai lịch sự, cầu thị"
+                    ],
+                    speech: "\"Tôi là quản lý ca hôm nay. Tôi rất tiếc vì trải nghiệm của anh/chị. Anh/chị kể giúp tôi chuyện gì đã xảy ra để tôi giải quyết ngay nhé.\"",
+                    avoid: ["Nói \"Anh/chị cứ đăng đi\"", "Đổi giảm giá lấy việc xóa review", "Để khách chờ quản lý quá lâu"],
+                    responsible: "Quản lý ca",
+                    prevent: "Trao quyền cho nhân viên xử lý lỗi nhỏ ngay (tặng nước, đổi món); quản lý đi tuần các bàn hỏi thăm"
+                }
+            },
+            {
+                id: 18,
+                group: "hanhvi",
+                title: "Trẻ em chạy nhảy, làm ồn trong nhà hàng",
+                summary: "Trẻ nhỏ chạy quanh khu vực bàn, lối đi, gần khu bếp",
+                tags: ["thường gặp"],
+                content: {
+                    background: "Bữa ăn gia đình, cuối tuần, ngày lễ",
+                    cause: "Trẻ chán khi chờ món, không có khu vui chơi, phụ huynh không để ý",
+                    steps: [
+                        "Ưu tiên an toàn: nếu trẻ đến gần khu bếp/đồ nóng → nhẹ nhàng đưa trẻ về chỗ ngay",
+                        "Nói chuyện lịch sự với phụ huynh, nêu lý do an toàn (không phê bình cách dạy con)",
+                        "Đề xuất: giấy bút tô màu, ghế trẻ em, ra món cho trẻ trước",
+                        "Bê đồ nóng cẩn thận, quan sát kỹ khi đi qua khu vực có trẻ"
+                    ],
+                    speech: "\"Anh chị ơi, em nhắc nhẹ vì lối đi có đồ nóng, sợ bé bị bỏng ạ. Em mang cho bé bộ tô màu để bé ngồi chơi nhé!\"",
+                    avoid: ["Quát mắng trẻ", "Phê phán phụ huynh trước mặt người khác", "Bỏ mặc vì ngại nhắc"],
+                    responsible: "Phục vụ / Quản lý ca",
+                    prevent: "Chuẩn bị ghế trẻ em, đồ chơi/tô màu; xếp gia đình có trẻ xa khu bếp & lối đi chính"
+                }
+            },
+            {
+                id: 19,
+                group: "hanhvi",
+                title: "Khách mang đồ ăn, đồ uống từ bên ngoài vào",
+                summary: "Khách tự mang rượu, bánh kem hoặc đồ ăn ngoài vào dùng",
+                tags: ["trung bình"],
+                content: {
+                    background: "Sinh nhật, tiệc, khách quen mang rượu riêng",
+                    cause: "Khách không biết quy định của nhà hàng",
+                    steps: [
+                        "Chào đón bình thường, không tịch thu đồ của khách",
+                        "Lịch sự thông báo quy định (cho phép/không cho phép, phí phục vụ nếu có)",
+                        "Bánh kem sinh nhật → hỗ trợ cắt bánh, cắm nến, mang đĩa (có thể là điểm cộng)",
+                        "Nếu không được phép → đề xuất món tương đương của nhà hàng"
+                    ],
+                    speech: "\"Dạ nhà hàng mình có phụ thu phí mở rượu 100.000đ/chai ạ. Bánh sinh nhật thì em hỗ trợ cắt bánh và cắm nến giúp mình luôn nhé!\"",
+                    avoid: ["Nói giọng trách móc", "Tự ý cất đồ của khách", "Thông báo phụ phí lúc thanh toán mà chưa báo trước"],
+                    responsible: "Phục vụ / Quản lý ca",
+                    prevent: "Ghi rõ quy định & phí mang đồ ngoài vào trên menu, khi nhận đặt bàn"
+                }
+            },
+
+            // Nhóm 5: An toàn & Khẩn cấp
+            {
+                id: 20,
+                group: "antoan",
+                title: "Khách bị dị ứng thực phẩm",
+                summary: "Khách nổi mẩn, ngứa, sưng môi/mặt, khó thở sau khi ăn",
+                tags: ["khẩn cấp", "quan trọng"],
+                content: {
+                    background: "Dị ứng hải sản, đậu phộng, sữa, trứng... — có thể nguy hiểm tính mạng trong vài phút",
+                    cause: "Món có thành phần gây dị ứng không được thông báo, nhiễm chéo trong bếp",
+                    steps: [
+                        "Ngừng cho khách ăn tiếp món nghi ngờ, giữ lại món để kiểm tra",
+                        "Hỏi khách có mang thuốc/bút tiêm dị ứng (epinephrine) không — hỗ trợ khách tự dùng",
+                        "Có dấu hiệu khó thở, sưng mặt/họng, chóng mặt → GỌI 115 NGAY",
+                        "Cho khách ngồi tư thế dễ thở; nếu choáng, mệt lả → nằm, kê cao chân",
+                        "Một người ở cạnh theo dõi liên tục, một người đón xe cấp cứu",
+                        "Báo quản lý, ghi lại món đã ăn và thời điểm xuất hiện triệu chứng"
+                    ],
+                    speech: "\"Anh/chị có bị dị ứng gì không ạ? Anh/chị có mang theo thuốc không? Em đã gọi cấp cứu, em ở đây với anh/chị.\"",
+                    avoid: ["Tự cho khách uống thuốc không rõ loại", "Chờ \"xem có đỡ không\" khi khách khó thở", "Để khách một mình"],
+                    responsible: "Phục vụ / Quản lý ca",
+                    prevent: "Hỏi về dị ứng khi ghi đơn; ghi rõ thành phần gây dị ứng trên menu; dụng cụ riêng cho món không chứa chất gây dị ứng"
+                }
+            },
+            {
+                id: 21,
+                group: "antoan",
+                title: "Cháy bếp / hỏa hoạn",
+                summary: "Lửa bùng lên ở bếp, chảo dầu, ống hút khói hoặc khu vực khác",
+                tags: ["khẩn cấp", "quan trọng"],
+                content: {
+                    background: "Bếp gas, chảo dầu nóng, dầu mỡ bám ống hút khói, chập điện",
+                    cause: "Bất cẩn khi nấu, không vệ sinh ống hút khói, thiết bị điện quá tải",
+                    steps: [
+                        "Hô to báo động \"CHÁY!\" cho mọi người biết",
+                        "Cháy nhỏ chảo dầu → tắt bếp, đậy nắp/chăn chống cháy. TUYỆT ĐỐI KHÔNG dùng nước",
+                        "Dùng bình chữa cháy phù hợp nếu đã được huấn luyện và lửa còn nhỏ",
+                        "Lửa lớn, không kiểm soát → khóa van gas tổng, ngắt điện nếu an toàn",
+                        "Hướng dẫn khách thoát theo lối thoát hiểm, cúi thấp nếu có khói, không dùng thang máy",
+                        "Gọi 114, tập trung tại điểm an toàn, điểm danh nhân viên"
+                    ],
+                    speech: "\"Xin quý khách bình tĩnh, đi theo hướng dẫn của nhân viên ra lối thoát hiểm phía này. Không quay lại lấy đồ, không dùng thang máy.\"",
+                    avoid: ["Dội nước vào chảo dầu cháy", "Quay vào lấy đồ đạc", "Gây hoảng loạn, chen lấn"],
+                    responsible: "Bếp trưởng / Quản lý ca / Toàn bộ nhân viên",
+                    prevent: "Vệ sinh ống hút khói định kỳ; kiểm tra bình chữa cháy; diễn tập PCCC; lối thoát hiểm luôn thông thoáng"
+                }
+            },
+            {
+                id: 22,
+                group: "antoan",
+                title: "Khách bị trượt ngã",
+                summary: "Khách trượt ngã do sàn ướt, bậc thềm, nhà vệ sinh",
+                tags: ["khẩn cấp"],
+                content: {
+                    background: "Sàn ướt khi lau, đổ nước/dầu, trời mưa, bậc thang thiếu sáng",
+                    cause: "Không đặt biển cảnh báo, không lau kịp thời",
+                    steps: [
+                        "Đến hỗ trợ ngay, KHÔNG vội kéo khách đứng dậy",
+                        "Hỏi khách đau ở đâu, có đập đầu không, có cử động được không",
+                        "Nghi chấn thương đầu, cổ, lưng hoặc gãy xương → giữ nguyên tư thế, gọi 115",
+                        "Ngã nhẹ → dìu khách ngồi nghỉ, chườm lạnh vết bầm, sơ cứu vết trầy",
+                        "Đặt biển cảnh báo, xử lý chỗ trơn ngay",
+                        "Báo quản lý, ghi nhận sự việc, giữ hình ảnh camera"
+                    ],
+                    speech: "\"Anh/chị có sao không ạ? Anh/chị cứ ngồi yên, đừng vội đứng lên. Đau ở đâu anh/chị nói em nhé.\"",
+                    avoid: ["Kéo khách dậy khi chưa biết chấn thương", "Nói \"Do anh/chị không để ý\"", "Bỏ qua dù khách nói \"không sao\""],
+                    responsible: "Phục vụ / Quản lý ca",
+                    prevent: "Biển \"Sàn ướt\"; thảm chống trơn ở cửa & nhà vệ sinh; lau ngay khi đổ; đủ ánh sáng ở bậc thang"
+                }
+            },
+            {
+                id: 23,
+                group: "antoan",
+                title: "Khách ngất xỉu / bất tỉnh",
+                summary: "Khách đột ngột ngất, ngã gục, không phản ứng",
+                tags: ["khẩn cấp", "quan trọng"],
+                content: {
+                    background: "Hạ đường huyết, say nắng, bệnh tim, đột quỵ, say rượu nặng",
+                    cause: "Tình trạng sức khỏe của khách, môi trường quá nóng",
+                    steps: [
+                        "Gọi to, vỗ nhẹ vai kiểm tra phản ứng",
+                        "Không phản ứng → GỌI 115 NGAY, nhờ người đi tìm người biết sơ cứu",
+                        "Kiểm tra thở: không thở/thở bất thường → ép tim (CPR) nếu đã được huấn luyện, làm theo hướng dẫn của tổng đài 115",
+                        "Còn thở → đặt nằm nghiêng an toàn, nới lỏng quần áo, giữ thoáng khí",
+                        "Tỉnh lại → cho nằm nghỉ, không cho ăn uống ngay, theo dõi đến khi có người nhà/y tế",
+                        "Giải tán đám đông, giữ không gian cho cấp cứu"
+                    ],
+                    speech: "(Với người đi cùng) \"Chúng tôi đã gọi cấp cứu 115. Anh/chị có biết bạn mình có bệnh gì hoặc đang dùng thuốc gì không ạ?\"",
+                    avoid: ["Cho người bất tỉnh uống nước, ăn", "Lay mạnh, tát mặt", "Để đông người vây quanh"],
+                    responsible: "Quản lý ca / Nhân viên được đào tạo sơ cứu",
+                    prevent: "Đào tạo sơ cứu & CPR cơ bản; tủ sơ cứu đầy đủ; dán số khẩn cấp ở quầy"
+                }
+            },
+            {
+                id: 24,
+                group: "antoan",
+                title: "Mất điện đột ngột",
+                summary: "Nhà hàng mất điện khi đang có khách",
+                tags: ["trung bình"],
+                content: {
+                    background: "Sự cố lưới điện, chập điện nội bộ, quá tải",
+                    cause: "Thiết bị cũ, dùng quá nhiều thiết bị cùng lúc, mất điện khu vực",
+                    steps: [
+                        "Giữ bình tĩnh, bật đèn khẩn cấp/đèn pin ngay",
+                        "Thông báo ngắn gọn cho khách, mời ngồi yên tại chỗ",
+                        "Bếp: tắt bếp gas, thiết bị đang chạy; nếu nghi chập điện → ngắt cầu dao, không dùng nước",
+                        "Kiểm tra nguyên nhân, liên hệ điện lực/kỹ thuật; bật máy phát nếu có",
+                        "Mất điện lâu → thông báo món còn phục vụ được, hỗ trợ thanh toán bằng tiền mặt/QR",
+                        "Kiểm tra tủ lạnh/tủ đông, ghi giờ mất điện để đánh giá an toàn thực phẩm"
+                    ],
+                    speech: "\"Xin quý khách bình tĩnh ngồi tại chỗ, nhà hàng đang bị mất điện tạm thời. Chúng tôi đang xử lý và sẽ cập nhật ngay cho quý khách.\"",
+                    avoid: ["Để khách tự đi lại trong bóng tối", "Tự sửa điện khi không có chuyên môn", "Phục vụ món đông lạnh đã rã đông lâu"],
+                    responsible: "Quản lý ca / Kỹ thuật",
+                    prevent: "Đèn khẩn cấp ở lối đi, lối thoát; máy phát điện dự phòng; kiểm tra hệ thống điện định kỳ"
+                }
+            },
+
+            // ===== 5 TÌNH HUỐNG MỚI — An toàn & Khẩn cấp =====
+            {
+                id: 25,
+                group: "antoan",
+                title: "Khách bị hóc / nghẹn thức ăn",
+                summary: "Khách ôm cổ, không nói được, ho không ra tiếng, khó thở",
+                tags: ["khẩn cấp", "mới"],
+                content: {
+                    background: "Ăn nhanh, vừa ăn vừa cười nói, món có xương, trẻ nhỏ và người lớn tuổi",
+                    cause: "Mẩu thức ăn hoặc xương mắc ở đường thở",
+                    steps: [
+                        "Hỏi \"Anh/chị có bị hóc không?\" — nếu khách còn ho mạnh, nói được: khuyến khích ho tiếp, không vỗ lưng",
+                        "Khách không nói, không ho được → gọi người khác GỌI 115 ngay",
+                        "Người đã được huấn luyện: vỗ lưng giữa hai bả vai 5 lần, rồi ép bụng (Heimlich) 5 lần, lặp lại đến khi dị vật ra",
+                        "Phụ nữ mang thai hoặc người béo phì → ép ở ngực thay vì bụng",
+                        "Khách bất tỉnh → đặt nằm, bắt đầu CPR theo hướng dẫn của tổng đài 115",
+                        "Dù đã ổn vẫn khuyên khách đi kiểm tra y tế"
+                    ],
+                    speech: "\"Anh/chị có bị hóc không? Em sẽ giúp anh/chị, em đã gọi cấp cứu rồi.\"",
+                    avoid: ["Dùng tay mò lấy dị vật khi không nhìn thấy", "Cho uống nước hoặc nuốt cơm cho trôi", "Vỗ lưng khi khách vẫn đang ho mạnh được"],
+                    responsible: "Nhân viên được đào tạo sơ cứu / Quản lý ca",
+                    prevent: "Đào tạo sơ cứu hóc nghẹn cho tất cả nhân viên; dán hướng dẫn Heimlich ở khu nhân viên; cắt nhỏ món cho trẻ em & người già"
+                }
+            },
+            {
+                id: 26,
+                group: "antoan",
+                title: "Khách nghi ngộ độc thực phẩm",
+                summary: "Khách đau bụng, buồn nôn, nôn, tiêu chảy trong hoặc sau bữa ăn",
+                tags: ["khẩn cấp", "mới"],
+                content: {
+                    background: "Có thể xảy ra tại nhà hàng hoặc khách gọi điện phản ánh sau khi về",
+                    cause: "Thực phẩm hỏng, bảo quản sai nhiệt độ, nhiễm chéo sống–chín, nước đá không đảm bảo",
+                    steps: [
+                        "Hỗ trợ khách đến chỗ thoáng, gần nhà vệ sinh, cho ngồi/nằm nghỉ",
+                        "Có triệu chứng nặng (nôn liên tục, sốt cao, lơ mơ, máu trong phân, khó thở) → gọi 115",
+                        "Cho uống từng ngụm nước nhỏ/oresol nếu khách tỉnh và không nôn liên tục",
+                        "Giữ lại mẫu món khách đã ăn, ghi danh sách món & giờ ăn",
+                        "Kiểm tra xem có bàn khác dùng cùng món có triệu chứng không — tạm ngưng bán món nghi ngờ",
+                        "Quản lý giữ liên lạc với khách, phối hợp với cơ quan y tế nếu được yêu cầu"
+                    ],
+                    speech: "\"Chúng tôi rất lo cho sức khỏe của anh/chị. Em sẽ hỗ trợ anh/chị ngay, nếu cần chúng tôi gọi cấp cứu. Nhà hàng sẽ giữ lại món ăn để kiểm tra.\"",
+                    avoid: ["Khẳng định ngay \"Không phải do đồ ăn nhà hàng\"", "Tự cho khách uống thuốc cầm tiêu chảy", "Vứt bỏ mẫu thức ăn"],
+                    responsible: "Quản lý ca / Bếp trưởng",
+                    prevent: "Lưu mẫu thức ăn theo quy định; kiểm soát nhiệt độ tủ lạnh/tủ đông; tách thớt dao sống–chín; kiểm tra nguồn nguyên liệu"
+                }
+            },
+            {
+                id: 27,
+                group: "antoan",
+                title: "Rò rỉ gas",
+                summary: "Ngửi thấy mùi gas trong bếp hoặc khu vực khách",
+                tags: ["khẩn cấp", "mới"],
+                content: {
+                    background: "Bình gas, dây dẫn, van, bếp gas mini tại bàn lẩu/nướng",
+                    cause: "Dây dẫn lão hóa, van hỏng, lắp bình không chặt, quên tắt bếp",
+                    steps: [
+                        "TUYỆT ĐỐI KHÔNG bật/tắt công tắc điện, không bật lửa, không dùng điện thoại tại khu vực có mùi gas",
+                        "Khóa van bình gas / van gas tổng ngay nếu tiếp cận an toàn",
+                        "Mở toàn bộ cửa để thông gió tự nhiên (không bật quạt)",
+                        "Tắt ngay toàn bộ bếp gas mini tại các bàn",
+                        "Hướng dẫn khách và nhân viên ra khỏi khu vực một cách bình tĩnh",
+                        "Ra nơi an toàn rồi mới gọi 114 và đơn vị cung cấp gas; không quay lại cho đến khi được kiểm tra"
+                    ],
+                    speech: "\"Xin quý khách bình tĩnh, nhà hàng cần kiểm tra kỹ thuật. Mời quý khách đi theo nhân viên ra ngoài, vui lòng không hút thuốc hoặc bật lửa.\"",
+                    avoid: ["Bật đèn để \"xem cho rõ\"", "Bật quạt/máy hút khói điện", "Hút thuốc gần khu vực", "Tự sửa van, dây dẫn"],
+                    responsible: "Bếp trưởng / Quản lý ca",
+                    prevent: "Kiểm tra dây, van gas hàng ngày; thay dây dẫn định kỳ; lắp đầu báo rò rỉ gas; kiểm tra bếp mini trước khi đưa ra bàn"
+                }
+            },
+            {
+                id: 28,
+                group: "antoan",
+                title: "Nhân viên/khách bị bỏng hoặc đứt tay",
+                summary: "Bị bỏng do nước sôi, dầu, nồi lẩu; đứt tay do dao, ly vỡ",
+                tags: ["khẩn cấp", "mới"],
+                content: {
+                    background: "Bếp giờ cao điểm, bê đồ nóng, ly chén vỡ, lẩu/nướng tại bàn",
+                    cause: "Vội vàng, không dùng găng/khăn cách nhiệt, sàn trơn, dao cùn",
+                    steps: [
+                        "BỎNG: đưa ngay vùng bỏng dưới vòi nước mát (không phải nước đá) khoảng 20 phút",
+                        "Tháo nhẫn, đồng hồ quanh vùng bỏng trước khi sưng; KHÔNG bôi kem đánh răng, nước mắm, dầu",
+                        "Phủ nhẹ bằng gạc sạch; không chọc vỡ bóng nước",
+                        "ĐỨT TAY: ấn chặt bằng gạc sạch để cầm máu, nâng cao tay",
+                        "Bỏng rộng, bỏng mặt/tay/vùng kín, vết cắt sâu chảy máu không ngừng → gọi 115 hoặc đưa đi viện",
+                        "Thu dọn mảnh vỡ, khử trùng khu vực, ghi nhận sự cố"
+                    ],
+                    speech: "(Với khách) \"Anh/chị cho em xem vết thương nhé, em xả nước mát ngay giúp anh/chị. Nếu cần chúng tôi đưa anh/chị đi khám.\"",
+                    avoid: ["Chườm đá trực tiếp lên vết bỏng", "Bôi kem đánh răng, mỡ, nước mắm", "Để nhân viên bị thương tiếp tục làm việc với thực phẩm"],
+                    responsible: "Quản lý ca / Bếp trưởng",
+                    prevent: "Tủ sơ cứu có gạc, băng, thuốc bỏng; găng chịu nhiệt, khăn cách nhiệt; khay bê nồi lẩu; dọn mảnh vỡ bằng chổi, không bằng tay"
+                }
+            },
+            {
+                id: 29,
+                group: "antoan",
+                title: "Trẻ em đi lạc trong nhà hàng",
+                summary: "Phụ huynh báo mất con hoặc nhân viên thấy trẻ đi một mình",
+                tags: ["khẩn cấp", "mới"],
+                content: {
+                    background: "Nhà hàng rộng, nhiều tầng, có khu vui chơi, giờ đông khách",
+                    cause: "Phụ huynh không để ý, trẻ đi vệ sinh hoặc đi chơi một mình",
+                    steps: [
+                        "Trấn an phụ huynh, hỏi nhanh: tên, tuổi, quần áo, đặc điểm, lần cuối thấy ở đâu",
+                        "Báo ngay toàn bộ nhân viên qua bộ đàm/nhóm chat",
+                        "Bố trí người đứng ở TẤT CẢ cửa ra vào, chú ý trẻ đi cùng người lạ",
+                        "Chia khu vực tìm: nhà vệ sinh, khu vui chơi, cầu thang, bếp, kho, bãi xe",
+                        "Kiểm tra camera; sau 10–15 phút chưa tìm thấy → báo công an 113",
+                        "Thấy trẻ đi một mình → ở cạnh trẻ, đưa về quầy lễ tân, không giao trẻ cho ai khi chưa xác minh đúng phụ huynh"
+                    ],
+                    speech: "\"Anh/chị bình tĩnh, toàn bộ nhân viên đang tìm bé ngay. Bé tên gì, mặc áo màu gì ạ? Lần cuối anh/chị thấy bé ở đâu?\"",
+                    avoid: ["Chờ \"chắc bé chạy đâu đó\" rồi mới tìm", "Giao trẻ cho người nhận là người nhà khi chưa xác minh", "Thông báo loa làm hoảng loạn mà không có kế hoạch"],
+                    responsible: "Quản lý ca / Bảo vệ / Toàn bộ nhân viên",
+                    prevent: "Cửa khu vui chơi có người trông; khu vực bếp/kho có cửa đóng; quy trình \"tìm trẻ lạc\" được diễn tập"
+                }
+            },
+
+            // ===== 30 TÌNH HUỐNG BỔ SUNG (#31–#60) =====
+
+            // --- Phục vụ & Tiếp nhận ---
+            {
+                id: 31,
+                group: "phucvu",
+                title: "Khách để quên đồ tại nhà hàng",
+                summary: "Phát hiện điện thoại, ví, túi, áo khoác... khách bỏ lại sau khi về",
+                tags: ["thường gặp", "mới"],
+                content: {
+                    background: "Sau giờ cao điểm, khi dọn bàn, trong nhà vệ sinh, khu vực chờ",
+                    cause: "Khách vội, đồ để dưới ghế hoặc móc sau lưng ghế",
+                    steps: [
+                        "Nếu khách vừa rời đi và còn gần → nhanh chóng mang đồ ra trả",
+                        "Không mở ví, túi hay điện thoại để xem bên trong",
+                        "Ghi sổ đồ thất lạc: thời gian, bàn số, mô tả đồ vật, người nhặt",
+                        "Giao quản lý ca cất vào tủ có khóa",
+                        "Nếu có thông tin đặt bàn → gọi báo khách",
+                        "Khi trả: hỏi khách mô tả đồ, ký nhận vào sổ"
+                    ],
+                    speech: "\"Anh/chị ơi, anh/chị để quên chiếc túi ở bàn số 5. Anh/chị kiểm tra lại giúp em xem có đủ đồ không ạ.\"",
+                    avoid: ["Mở ví/điện thoại của khách", "Giao đồ cho người tự nhận là bạn của khách mà không xác minh", "Để đồ ở quầy không ai trông"],
+                    responsible: "Nhân viên phục vụ / Quản lý ca",
+                    prevent: "Nhắc khách kiểm tra đồ khi thanh toán; kiểm tra bàn ngay khi khách đứng dậy; có sổ và tủ đồ thất lạc"
+                }
+            },
+            {
+                id: 32,
+                group: "phucvu",
+                title: "Khách đặt bàn rồi không đến hoặc hủy sát giờ",
+                summary: "Bàn đã giữ nhưng khách không đến, hoặc báo hủy khi gần đến giờ hẹn",
+                tags: ["thường gặp", "mới"],
+                content: {
+                    background: "Giờ cao điểm, cuối tuần, tiệc đông người, ngày lễ",
+                    cause: "Khách quên, đổi kế hoạch, đặt nhiều nơi cùng lúc",
+                    steps: [
+                        "Gọi xác nhận khi khách trễ 10–15 phút so với giờ hẹn",
+                        "Không liên lạc được → giữ bàn theo thời gian quy định của nhà hàng rồi nhường cho khách đang chờ",
+                        "Khách báo hủy → cảm ơn đã báo, hỏi có muốn đặt lại ngày khác không",
+                        "Tiệc đã đặt cọc → áp dụng đúng chính sách cọc đã thông báo trước",
+                        "Ghi chú vào danh sách khách để lưu ý cho lần đặt sau"
+                    ],
+                    speech: "\"Dạ em chào anh/chị, em gọi từ nhà hàng để xác nhận bàn 6 người lúc 19 giờ. Anh/chị vẫn đến chứ ạ? Nhà hàng giữ bàn đến 19 giờ 15 ạ.\"",
+                    avoid: ["Gọi điện trách móc khách", "Tự đặt ra khoản phạt chưa thông báo trước", "Giữ bàn trống quá lâu trong khi khách khác đang chờ"],
+                    responsible: "Tiếp tân / Quản lý ca",
+                    prevent: "Nhắn xác nhận trước giờ hẹn; nói rõ thời gian giữ bàn khi nhận đặt; đặt cọc cho tiệc đông người và ngày lễ"
+                }
+            },
+            {
+                id: 33,
+                group: "phucvu",
+                title: "Khách đến khi bếp sắp đóng",
+                summary: "Khách vào gần giờ đóng cửa hoặc sau giờ nhận order cuối",
+                tags: ["trung bình", "mới"],
+                content: {
+                    background: "15–30 phút trước giờ đóng cửa, bếp đang dọn dẹp",
+                    cause: "Khách không biết giờ nhận order cuối, giờ đóng cửa không ghi rõ",
+                    steps: [
+                        "Chào đón lịch sự, không tỏ ra vội vã hay khó chịu",
+                        "Báo rõ giờ nhận order cuối và giờ đóng cửa",
+                        "Hỏi bếp ngay những món còn làm được, chỉ giới thiệu các món đó",
+                        "Nếu bếp đã đóng → xin lỗi, gợi ý đồ uống hoặc món mang về nếu có",
+                        "Không dọn dẹp ồn ào, tắt đèn hay kéo ghế lên bàn khi khách còn ăn"
+                    ],
+                    speech: "\"Dạ mời anh/chị vào ạ. Bếp nhận order đến 21 giờ 30, hiện vẫn làm được các món này. Nhà hàng đóng cửa lúc 22 giờ, anh/chị cứ dùng bữa thoải mái ạ.\"",
+                    avoid: ["Nói \"Sắp đóng cửa rồi, ăn nhanh nhé\"", "Lau sàn, kéo ghế ồn ào quanh bàn khách", "Nhận order rồi báo bếp không làm"],
+                    responsible: "Tiếp tân / Phục vụ / Bếp trưởng",
+                    prevent: "Ghi giờ nhận order cuối ở cửa, trên menu và trang đặt bàn; thống nhất danh sách món phục vụ cuối ca"
+                }
+            },
+            {
+                id: 34,
+                group: "phucvu",
+                title: "Khách ngồi rất lâu khi nhiều khách đang chờ bàn",
+                summary: "Bàn đã ăn xong từ lâu nhưng khách vẫn ngồi nói chuyện, khách mới phải chờ",
+                tags: ["trung bình", "mới"],
+                content: {
+                    background: "Giờ cao điểm, cuối tuần, bàn đẹp hoặc bàn lớn",
+                    cause: "Khách gặp mặt, nói chuyện lâu; nhà hàng không có quy định thời gian dùng bữa",
+                    steps: [
+                        "Không đuổi khéo hay để hóa đơn lên bàn khi khách chưa yêu cầu",
+                        "Hỏi khách có muốn gọi thêm đồ uống hay tráng miệng không",
+                        "Dọn bớt bát đĩa đã dùng xong một cách nhẹ nhàng",
+                        "Nếu có khu vực khác (quầy, sofa, sân) → mời khách chuyển ra để ngồi tiếp, có thể tặng nước",
+                        "Chỉ áp dụng giới hạn thời gian nếu đã báo trước khi khách đặt bàn"
+                    ],
+                    speech: "\"Anh/chị dùng thêm trà hay tráng miệng không ạ? Bên em có khu sân vườn thoáng mát, nếu anh/chị muốn ngồi trò chuyện tiếp em mời ra đó và tặng bàn mình ấm trà ạ.\"",
+                    avoid: ["Đứng chờ cạnh bàn, nhìn đồng hồ", "Nói \"Có khách đang chờ, anh/chị về được chưa\"", "Tắt điều hòa, bật đèn sáng để khách tự về"],
+                    responsible: "Phục vụ / Quản lý ca",
+                    prevent: "Báo thời gian dùng bữa khi đặt bàn giờ cao điểm (ví dụ 90 phút); có khu vực ngồi chờ và ngồi thư giãn"
+                }
+            },
+            {
+                id: 35,
+                group: "phucvu",
+                title: "Khách dùng xe lăn, khiếm thị hoặc cần hỗ trợ di chuyển",
+                summary: "Khách khuyết tật, người cao tuổi đi lại khó khăn cần được hỗ trợ",
+                tags: ["quan trọng", "mới"],
+                content: {
+                    background: "Lối vào có bậc thềm, bàn chật, nhà vệ sinh ở tầng trên",
+                    cause: "Nhà hàng chưa chuẩn bị lối đi, chỗ ngồi phù hợp; nhân viên chưa được hướng dẫn",
+                    steps: [
+                        "Hỏi khách có cần hỗ trợ không và hỗ trợ theo cách nào, không tự ý đẩy xe hay nắm tay",
+                        "Xếp bàn gần lối vào, gần nhà vệ sinh, lối đi rộng; dời ghế để xe lăn vào sát bàn",
+                        "Khách khiếm thị: đọc menu, mô tả vị trí đồ ăn trên đĩa theo kim đồng hồ nếu khách muốn",
+                        "Nói chuyện trực tiếp với khách, không chỉ nói qua người đi cùng",
+                        "Hướng dẫn rõ đường đến nhà vệ sinh, thang máy, lối thoát hiểm"
+                    ],
+                    speech: "\"Em có thể hỗ trợ gì cho anh/chị không ạ? Bên em có bàn gần cửa, lối đi rộng, em dời ghế ra để anh/chị vào cho tiện nhé.\"",
+                    avoid: ["Tự ý đẩy xe lăn khi chưa hỏi", "Nói chuyện với người đi cùng thay vì với khách", "Xếp bàn ở góc chật, gần bếp"],
+                    responsible: "Tiếp tân / Phục vụ",
+                    prevent: "Hỏi nhu cầu đặc biệt khi nhận đặt bàn; dốc hoặc ván dắt cho bậc thềm; giữ lối đi rộng ít nhất bằng một xe lăn"
+                }
+            },
+            {
+                id: 36,
+                group: "phucvu",
+                title: "Khách nước ngoài không nói được tiếng Việt",
+                summary: "Khách và nhân viên khó hiểu nhau khi gọi món, hỏi thành phần, thanh toán",
+                tags: ["thường gặp", "mới"],
+                content: {
+                    background: "Khu du lịch, trung tâm thành phố, khách đi lẻ",
+                    cause: "Menu chỉ có tiếng Việt, nhân viên ít ngoại ngữ",
+                    steps: [
+                        "Chào bằng tiếng Anh đơn giản, mỉm cười, giữ thái độ tự tin",
+                        "Đưa menu có hình ảnh hoặc menu tiếng Anh; chỉ vào món để xác nhận",
+                        "Dùng ứng dụng dịch trên điện thoại khi cần, nhất là để hỏi về dị ứng",
+                        "Nhờ đồng nghiệp biết ngoại ngữ hỗ trợ nếu có",
+                        "Khi thanh toán: đưa hóa đơn, chỉ rõ tổng tiền, báo các cách thanh toán nhận được"
+                    ],
+                    speech: "\"Hello, welcome! Here is the English menu. Do you have any food allergies?\" (Xin chào, mời xem menu tiếng Anh. Anh/chị có dị ứng món gì không?)",
+                    avoid: ["Nói to, nói nhanh như thể khách sẽ hiểu hơn", "Đoán món khách muốn mà không xác nhận", "Tính giá khác với khách Việt"],
+                    responsible: "Phục vụ / Quản lý ca",
+                    prevent: "Menu song ngữ có hình; bảng câu giao tiếp tiếng Anh cơ bản cho nhân viên; ghi chú thành phần dễ gây dị ứng bằng biểu tượng"
+                }
+            },
+
+            // --- Chất lượng món & đồ uống ---
+            {
+                id: 37,
+                group: "chatluong",
+                title: "Đồ uống pha sai hoặc không đạt",
+                summary: "Nước quá nhạt/quá ngọt, sai size, sai loại sữa, đá tan làm loãng",
+                tags: ["thường gặp", "mới"],
+                content: {
+                    background: "Quầy bar đông đơn, nhân viên pha chế mới",
+                    cause: "Không theo công thức chuẩn, ghi order thiếu yêu cầu (ít đường, sữa hạt...), để đồ uống chờ lâu",
+                    steps: [
+                        "Xin lỗi, hỏi rõ khách thấy chưa ổn ở điểm nào",
+                        "Đề nghị pha lại ly mới ngay, không chỉ thêm đường hay đá vào ly cũ",
+                        "Báo quầy bar đúng yêu cầu của khách, ưu tiên làm",
+                        "Mang ly mới ra, hỏi lại khách đã vừa ý chưa",
+                        "Ghi nhận lỗi để quầy bar kiểm tra công thức"
+                    ],
+                    speech: "\"Em xin lỗi anh/chị, để em pha lại ly mới đúng ít đường như anh/chị dặn, khoảng 3 phút ạ.\"",
+                    avoid: ["Nói \"Công thức bên em là vậy\"", "Đổ thêm đá hoặc đường vào ly cũ rồi mang lại", "Tính tiền ly làm lại"],
+                    responsible: "Phục vụ / Pha chế",
+                    prevent: "Công thức chuẩn có định lượng dán tại quầy; ghi rõ yêu cầu đặc biệt trên phiếu; ra đồ uống ngay khi pha xong"
+                }
+            },
+            {
+                id: 38,
+                group: "chatluong",
+                title: "Món ăn mang ra bị nguội",
+                summary: "Món nóng ra bàn đã nguội, súp hoặc lẩu không đủ nóng",
+                tags: ["thường gặp", "mới"],
+                content: {
+                    background: "Giờ cao điểm, món nằm chờ ở quầy ra món, bàn xa bếp",
+                    cause: "Món làm xong nhưng chưa có người mang ra, đĩa không được làm ấm",
+                    steps: [
+                        "Xin lỗi, thu món lại ngay",
+                        "Báo bếp làm mới hoặc hâm nóng đúng cách tùy món (món chiên giòn nên làm mới)",
+                        "Báo khách thời gian chờ cụ thể",
+                        "Mang món ra ngay khi bếp xong, kiểm tra độ nóng trước khi rời quầy",
+                        "Nhắc nhở việc món nằm chờ ở quầy ra món"
+                    ],
+                    speech: "\"Em xin lỗi, món này ra chưa đủ nóng. Em báo bếp làm lại ngay, khoảng 7 phút ạ.\"",
+                    avoid: ["Cho món vào lò vi sóng hâm lại rồi mang ra như món mới", "Nói \"Trời lạnh nên món nguội nhanh\"", "Để khách tự gọi mới phát hiện"],
+                    responsible: "Phục vụ / Bếp trưởng",
+                    prevent: "Đèn giữ nóng ở quầy ra món; làm ấm đĩa cho món nóng; người điều phối gọi phục vụ ngay khi món xong"
+                }
+            },
+            {
+                id: 39,
+                group: "chatluong",
+                title: "Thịt, gà, hải sản chưa chín tới",
+                summary: "Khách phát hiện thịt còn đỏ, gà còn hồng, hải sản chưa chín",
+                tags: ["quan trọng", "mới"],
+                content: {
+                    background: "Món nướng, chiên, lẩu, món làm vội giờ cao điểm",
+                    cause: "Không đủ thời gian hoặc nhiệt độ nấu, miếng thịt quá dày",
+                    steps: [
+                        "Xin lỗi, thu món lại ngay, không tranh luận về độ chín",
+                        "Báo bếp làm món mới, không chỉ nấu thêm phần cũ trước mặt khách",
+                        "Hỏi khách đã ăn phần chưa chín chưa; nếu đã ăn → theo dõi, báo quản lý",
+                        "Món bò/thịt khách tự chọn độ chín → hỏi lại khách muốn chín tới mức nào",
+                        "Bếp kiểm tra lại quy trình nấu món đó trong ca"
+                    ],
+                    speech: "\"Em thành thật xin lỗi anh/chị. Em xin phép thu món này và làm phần mới chín kỹ, món này nhà hàng không tính tiền ạ.\"",
+                    avoid: ["Nói \"Món này ăn tái mới ngon\" với gà hoặc thịt heo", "Mang món về bếp rồi chiên thêm và mang lại phần cũ", "Bỏ qua nếu khách đã ăn một phần"],
+                    responsible: "Phục vụ / Bếp trưởng / Quản lý ca",
+                    prevent: "Dùng nhiệt kế đo thịt cho món dày; quy định thời gian nấu chuẩn; hỏi độ chín khi khách gọi bò bít tết"
+                }
+            },
+            {
+                id: 40,
+                group: "chatluong",
+                title: "Bát đĩa, ly cốc bẩn hoặc bị mẻ",
+                summary: "Khách thấy vết bẩn, vết son, cặn, hoặc ly mẻ miệng",
+                tags: ["quan trọng", "mới"],
+                content: {
+                    background: "Giờ cao điểm, rửa vội, máy rửa bát trục trặc",
+                    cause: "Rửa không kỹ, không kiểm tra khi lau, không loại bỏ đồ mẻ",
+                    steps: [
+                        "Xin lỗi ngay, thay đồ mới sạch",
+                        "Nếu món đã nằm trong bát bẩn → làm lại món, không chỉ chuyển sang bát khác",
+                        "Ly hoặc đĩa mẻ → loại bỏ ngay, không đưa lại vào sử dụng",
+                        "Kiểm tra nhanh các đồ dùng khác trên bàn",
+                        "Báo khu rửa kiểm tra lại quy trình và máy rửa"
+                    ],
+                    speech: "\"Em xin lỗi anh/chị, em thay ly mới ngay ạ. Em kiểm tra lại các bát đĩa trên bàn mình luôn.\"",
+                    avoid: ["Lau bằng khăn trước mặt khách rồi đưa lại", "Nói \"Vết này rửa không ra\"", "Tiếp tục dùng đồ đã mẻ"],
+                    responsible: "Phục vụ / Tổ rửa / Quản lý ca",
+                    prevent: "Kiểm tra từng món đồ khi lau khô và khi set bàn; loại bỏ đồ mẻ hằng ngày; bảo trì máy rửa định kỳ"
+                }
+            },
+            {
+                id: 41,
+                group: "chatluong",
+                title: "Khách yêu cầu món ngoài thực đơn hoặc chế biến riêng",
+                summary: "Khách muốn món không có trong menu, hoặc đổi cách nấu, đổi nguyên liệu",
+                tags: ["trung bình", "mới"],
+                content: {
+                    background: "Khách quen, khách có chế độ ăn riêng, trẻ nhỏ, người lớn tuổi",
+                    cause: "Nhu cầu cá nhân; nhân viên không biết bếp có làm được hay không",
+                    steps: [
+                        "Lắng nghe, ghi lại chính xác yêu cầu",
+                        "Hỏi bếp trưởng trước khi hứa với khách",
+                        "Làm được → báo giá (nếu khác giá menu) và thời gian chờ trước khi làm",
+                        "Không làm được → giải thích ngắn gọn, gợi ý món gần giống nhất trên menu",
+                        "Đánh dấu rõ yêu cầu riêng trên phiếu gửi bếp"
+                    ],
+                    speech: "\"Để em hỏi bếp trưởng xem có làm được không ạ... Dạ bếp làm được cháo trắng cho bé, giá 30.000đ, khoảng 15 phút ạ.\"",
+                    avoid: ["Hứa ngay rồi bếp không làm được", "Tính thêm tiền mà không báo trước", "Nói \"Không có trong menu thì không làm\""],
+                    responsible: "Phục vụ / Bếp trưởng",
+                    prevent: "Danh sách những thay đổi bếp chấp nhận được (bớt cay, không hành, đổi cơm...); menu riêng cho trẻ em và ăn chay"
+                }
+            },
+            {
+                id: 42,
+                group: "chatluong",
+                title: "Khách chê khẩu phần ít so với giá",
+                summary: "Khách cho rằng món quá ít, không giống hình trên menu",
+                tags: ["trung bình", "mới"],
+                content: {
+                    background: "Món mới, món đắt tiền, menu có hình minh họa",
+                    cause: "Định lượng không đều giữa các ca, hình menu khác thực tế, khách kỳ vọng khác",
+                    steps: [
+                        "Lắng nghe, không tranh cãi về giá trị món",
+                        "Kiểm tra với bếp xem món có đúng định lượng chuẩn không",
+                        "Thiếu định lượng → xin lỗi, bổ sung phần còn thiếu hoặc làm lại",
+                        "Đúng định lượng → giải thích nhẹ nhàng, gợi ý món ăn kèm phù hợp với số người",
+                        "Ghi nhận phản hồi để xem lại hình menu và định lượng"
+                    ],
+                    speech: "\"Cảm ơn anh/chị đã góp ý. Em kiểm tra với bếp, phần này đúng là thiếu so với chuẩn, em xin bổ sung thêm ngay ạ.\"",
+                    avoid: ["Nói \"Giá nào của nấy\"", "Bỏ qua phản hồi", "Hứa giảm giá khi chưa hỏi quản lý"],
+                    responsible: "Phục vụ / Bếp trưởng / Quản lý",
+                    prevent: "Cân định lượng chuẩn cho từng món; hình menu chụp từ món thật; ghi rõ món dùng cho mấy người"
+                }
+            },
+
+            // --- Thanh toán & Giá ---
+            {
+                id: 43,
+                group: "thanhtoan",
+                title: "Voucher, mã giảm giá không dùng được",
+                summary: "Khách đưa voucher hết hạn, không áp dụng cho món/giờ đó, hoặc đã dùng rồi",
+                tags: ["thường gặp", "mới"],
+                content: {
+                    background: "Chương trình khuyến mãi, voucher từ ứng dụng giao đồ ăn hoặc đối tác",
+                    cause: "Điều kiện áp dụng không rõ, nhân viên không nắm chương trình",
+                    steps: [
+                        "Kiểm tra kỹ voucher trước khi khách gọi món nếu khách đưa sớm",
+                        "Giải thích cụ thể lý do không áp dụng được (hết hạn ngày nào, điều kiện gì)",
+                        "Nếu lỗi do nhà hàng thông báo không rõ → báo quản lý xem xét vẫn áp dụng",
+                        "Gợi ý chương trình khác đang áp dụng được nếu có",
+                        "Ghi nhận để làm rõ điều kiện trong lần khuyến mãi sau"
+                    ],
+                    speech: "\"Dạ voucher này hết hạn ngày 31/10 ạ. Hôm nay bên em đang giảm 10% cho hóa đơn trên 500.000đ, em áp dụng cho bàn mình được ạ.\"",
+                    avoid: ["Nói \"Voucher này không có giá trị\" mà không giải thích", "Tỏ ra nghi ngờ khách gian lận", "Hứa áp dụng rồi lúc tính tiền lại từ chối"],
+                    responsible: "Thu ngân / Phục vụ / Quản lý ca",
+                    prevent: "Phổ biến điều kiện mọi chương trình cho nhân viên đầu ca; ghi rõ hạn và điều kiện trên voucher"
+                }
+            },
+            {
+                id: 44,
+                group: "thanhtoan",
+                title: "Khách yêu cầu xuất hóa đơn VAT",
+                summary: "Khách cần hóa đơn đỏ/hóa đơn điện tử ghi tên công ty",
+                tags: ["thường gặp", "mới"],
+                content: {
+                    background: "Khách đi công tác, tiếp khách, liên hoan công ty",
+                    cause: "Nhân viên không biết quy trình, khách báo muộn sau khi đã in hóa đơn",
+                    steps: [
+                        "Hỏi khách có cần hóa đơn VAT ngay khi thanh toán",
+                        "Ghi chính xác: tên công ty, mã số thuế, địa chỉ, email nhận hóa đơn",
+                        "Đọc lại thông tin cho khách xác nhận, nhất là mã số thuế",
+                        "Xuất hóa đơn điện tử theo quy trình của nhà hàng, báo khách khi nào nhận được",
+                        "Khách báo sai thông tin sau khi xuất → báo kế toán xử lý theo quy định"
+                    ],
+                    speech: "\"Anh/chị cho em xin tên công ty, mã số thuế và email nhận hóa đơn ạ. Em đọc lại để anh/chị kiểm tra nhé.\"",
+                    avoid: ["Ghi thông tin vội, sai mã số thuế", "Từ chối xuất hóa đơn", "Hứa thời gian gửi mà không chắc chắn"],
+                    responsible: "Thu ngân / Kế toán",
+                    prevent: "Mẫu phiếu ghi thông tin xuất hóa đơn tại quầy; mã QR để khách tự điền thông tin công ty"
+                }
+            },
+            {
+                id: 45,
+                group: "thanhtoan",
+                title: "Nghi ngờ khách trả tiền giả",
+                summary: "Tờ tiền có dấu hiệu bất thường khi khách thanh toán tiền mặt",
+                tags: ["trung bình", "mới"],
+                content: {
+                    background: "Giờ đông khách, buổi tối, mệnh giá lớn",
+                    cause: "Khách có thể cũng không biết mình cầm tiền giả",
+                    steps: [
+                        "Kiểm tra tờ tiền ngay tại quầy: cửa sổ trong suốt, hình ẩn, chất liệu polymer",
+                        "Lịch sự đề nghị khách đổi tờ khác, không buộc tội",
+                        "Trả lại tờ tiền nghi ngờ cho khách, không tự ý giữ hay xé",
+                        "Khách không có tờ khác → gợi ý chuyển khoản, quẹt thẻ",
+                        "Báo quản lý ca; nếu có dấu hiệu cố ý hoặc số lượng nhiều → quản lý liên hệ công an 113"
+                    ],
+                    speech: "\"Anh/chị ơi, tờ này em thấy hơi khác, anh/chị đổi giúp em tờ khác hoặc chuyển khoản được không ạ?\"",
+                    avoid: ["Nói to \"Tiền giả!\" trước mặt khách khác", "Tự ý giữ, xé tờ tiền", "Giữ khách lại bằng vũ lực"],
+                    responsible: "Thu ngân / Quản lý ca",
+                    prevent: "Đào tạo nhận biết tiền thật; máy hoặc đèn soi tiền tại quầy; khuyến khích thanh toán không dùng tiền mặt"
+                }
+            },
+            {
+                id: 46,
+                group: "thanhtoan",
+                title: "Trả lại tiền thừa sai",
+                summary: "Khách báo nhận thiếu tiền thối, hoặc thu ngân phát hiện đã trả thừa",
+                tags: ["quan trọng", "mới"],
+                content: {
+                    background: "Giờ cao điểm, nhiều bàn thanh toán cùng lúc",
+                    cause: "Đếm vội, nhầm mệnh giá giống màu, không đọc to số tiền nhận",
+                    steps: [
+                        "Bình tĩnh, cảm ơn khách đã báo",
+                        "Hỏi khách đã đưa tờ nào, đối chiếu hóa đơn và số tiền trong két",
+                        "Rõ ràng trả thiếu → xin lỗi, trả bù ngay",
+                        "Chưa rõ → quản lý kiểm két hoặc xem camera, báo kết quả cho khách sớm nhất",
+                        "Trả thừa và khách đã đi → không đuổi theo; nếu có thông tin liên lạc, quản lý gọi nhẹ nhàng"
+                    ],
+                    speech: "\"Cảm ơn anh/chị đã báo. Em kiểm tra lại ngay ạ... Dạ đúng là em thối thiếu 50.000đ, em xin lỗi và gửi lại anh/chị ạ.\"",
+                    avoid: ["Khẳng định \"Em đếm đúng rồi\" khi chưa kiểm tra", "Bắt khách lục ví chứng minh", "Thu ngân tự bù tiền mà không ghi nhận"],
+                    responsible: "Thu ngân / Quản lý ca",
+                    prevent: "Đọc to số tiền nhận và số tiền thối; đặt tờ khách đưa lên mặt két đến khi thối xong; kiểm két cuối ca"
+                }
+            },
+            {
+                id: 47,
+                group: "thanhtoan",
+                title: "Khách không đủ tiền thanh toán",
+                summary: "Khách quên ví, thẻ bị từ chối, tài khoản không đủ tiền",
+                tags: ["trung bình", "mới"],
+                content: {
+                    background: "Khách đi một mình, thẻ hết hạn mức, điện thoại hết pin",
+                    cause: "Thường là sự cố, hiếm khi cố ý",
+                    steps: [
+                        "Nói chuyện riêng, nhỏ nhẹ, tránh để khách mất mặt trước người khác",
+                        "Gợi ý các cách khác: chuyển khoản, ví điện tử, nhờ người thân chuyển giúp",
+                        "Có thể cho khách mượn sạc điện thoại để thanh toán",
+                        "Vẫn không được → quản lý quyết định: giữ giấy tờ tùy thân có ký nhận, hoặc ghi thông tin và hẹn thời gian thanh toán",
+                        "Lập biên bản ngắn có chữ ký của khách nếu cho thanh toán sau"
+                    ],
+                    speech: "\"Dạ không sao anh/chị, mình có thể chuyển khoản hoặc nhờ người nhà chuyển giúp ạ. Em cho mượn sạc điện thoại nếu cần nhé.\"",
+                    avoid: ["Nói lớn trước bàn khác", "Giữ khách lại hoặc đe dọa", "Bắt khách để lại điện thoại làm tin"],
+                    responsible: "Thu ngân / Quản lý ca",
+                    prevent: "Nhiều cách thanh toán (QR, thẻ, ví điện tử); quy trình rõ ràng cho trường hợp thanh toán sau"
+                }
+            },
+            {
+                id: 48,
+                group: "thanhtoan",
+                title: "Khách đòi hoàn tiền sau khi đã ăn gần hết",
+                summary: "Khách phàn nàn món không ngon và không muốn trả tiền dù đã ăn gần hết",
+                tags: ["trung bình", "mới"],
+                content: {
+                    background: "Thường xảy ra lúc thanh toán, khách không phản ánh trong lúc ăn",
+                    cause: "Khách không hài lòng nhưng ngại nói sớm, hoặc muốn được giảm giá",
+                    steps: [
+                        "Lắng nghe đầy đủ, cảm ơn khách đã góp ý",
+                        "Hỏi cụ thể món nào, vấn đề gì (vị, nhiệt độ, độ chín...)",
+                        "Vấn đề có thật (dị vật, chưa chín) → áp dụng như các tình huống tương ứng, miễn tiền món đó",
+                        "Chỉ là khẩu vị → quản lý quyết định giảm một phần hoặc tặng ưu đãi lần sau, không bắt buộc hoàn toàn bộ",
+                        "Nhắc nhẹ lần sau khách báo sớm để nhà hàng đổi món kịp"
+                    ],
+                    speech: "\"Em rất tiếc món chưa vừa ý anh/chị. Lần sau anh/chị báo em ngay khi dùng thử để em đổi món kịp nhé. Hôm nay quản lý bên em xin giảm 20% món này ạ.\"",
+                    avoid: ["Nói \"Ăn hết rồi còn chê\"", "Tranh cãi trước mặt khách khác", "Nhân viên tự ý miễn tiền mà không qua quản lý"],
+                    responsible: "Quản lý ca",
+                    prevent: "Phục vụ hỏi thăm sau 2–3 phút khi món ra để phát hiện vấn đề sớm; quy định rõ mức quản lý được giảm"
+                }
+            },
+
+            // --- Hành vi khách ---
+            {
+                id: 49,
+                group: "hanhvi",
+                title: "Khách hút thuốc ở khu vực cấm",
+                summary: "Khách hút thuốc lá hoặc thuốc lá điện tử trong phòng máy lạnh, khu có trẻ em",
+                tags: ["thường gặp", "mới"],
+                content: {
+                    background: "Tiệc nhậu, khu vực trong nhà, phòng VIP",
+                    cause: "Khách không thấy biển báo, quen thói quen, đã say",
+                    steps: [
+                        "Đến gần nhắc nhỏ nhẹ, không nói từ xa",
+                        "Chỉ khu vực được hút thuốc gần nhất",
+                        "Mang gạt tàn ra khu vực đó, có thể hỗ trợ mang đồ uống theo",
+                        "Khách vẫn tiếp tục → báo quản lý ca nhắc lại",
+                        "Bàn bên cạnh phàn nàn → cảm ơn họ, báo đang xử lý"
+                    ],
+                    speech: "\"Anh ơi, khu trong nhà mình không hút thuốc được ạ. Bên em có khu hút thuốc ngoài sân, em mang gạt tàn và ly của anh ra đó nhé.\"",
+                    avoid: ["Giật thuốc khỏi tay khách", "Nhắc lớn trước cả bàn", "Làm ngơ khi khách khác khó chịu"],
+                    responsible: "Phục vụ / Quản lý ca",
+                    prevent: "Biển cấm hút thuốc rõ ràng ở mỗi bàn và cửa vào; khu vực hút thuốc riêng có gạt tàn"
+                }
+            },
+            {
+                id: 50,
+                group: "hanhvi",
+                title: "Khách mang thú cưng vào nhà hàng",
+                summary: "Khách dắt chó, mèo vào khu ăn uống",
+                tags: ["trung bình", "mới"],
+                content: {
+                    background: "Cuối tuần, quán có sân vườn, khách đi dạo ghé vào",
+                    cause: "Khách không biết quy định về thú cưng",
+                    steps: [
+                        "Chào đón khách bình thường trước, sau đó báo quy định",
+                        "Nhà hàng cho phép → xếp bàn khu ngoài trời, xa khách khác; xin bát nước cho thú cưng",
+                        "Nhà hàng không cho phép → xin lỗi, gợi ý khu sân ngoài hoặc mua mang về",
+                        "Thú cưng gây ồn, chạy lung tung → nhờ khách giữ dây hoặc bế",
+                        "Khách khác sợ hoặc dị ứng → ưu tiên đổi chỗ cho bàn bên cạnh"
+                    ],
+                    speech: "\"Bé dễ thương quá ạ! Bên em có khu sân ngoài cho khách đi cùng thú cưng, em mời anh/chị ra đó và mang bát nước cho bé nhé.\"",
+                    avoid: ["Xua đuổi thú cưng", "Để thú cưng lên ghế, lên bàn ăn", "Cho thú cưng vào gần khu bếp"],
+                    responsible: "Tiếp tân / Phục vụ",
+                    prevent: "Ghi rõ quy định thú cưng ở cửa và trên trang đặt bàn; khu vực riêng nếu nhà hàng thân thiện với thú cưng"
+                }
+            },
+            {
+                id: 51,
+                group: "hanhvi",
+                title: "Khách quay phim, livestream chê nhà hàng hoặc nhân viên",
+                summary: "Khách quay video món ăn kèm lời chê, quay mặt nhân viên đăng mạng xã hội",
+                tags: ["quan trọng", "mới"],
+                content: {
+                    background: "Khách đang bức xúc, khách làm nội dung mạng xã hội",
+                    cause: "Vấn đề chưa được xử lý, khách muốn gây áp lực",
+                    steps: [
+                        "Giữ bình tĩnh, cư xử chuẩn mực như khi không có máy quay",
+                        "Không giật điện thoại, không che ống kính",
+                        "Mời quản lý ra giải quyết vấn đề gốc (món, phục vụ, giá)",
+                        "Nhân viên không muốn bị quay → được phép lịch sự rời khỏi khung hình",
+                        "Sau sự việc: quản lý theo dõi bài đăng, phản hồi công khai lịch sự nếu cần"
+                    ],
+                    speech: "(Quản lý) \"Em là quản lý ca. Em rất muốn giải quyết ngay vấn đề anh/chị gặp phải, anh/chị kể giúp em được không ạ?\"",
+                    avoid: ["Giật điện thoại, xô đẩy", "Cãi nhau hoặc nói lời nóng giận trước máy quay", "Đăng bài phản pháo, lộ thông tin cá nhân của khách"],
+                    responsible: "Quản lý ca",
+                    prevent: "Xử lý phàn nàn sớm tại bàn; đào tạo nhân viên giữ bình tĩnh trước máy quay; camera nhà hàng lưu lại sự việc"
+                }
+            },
+            {
+                id: 52,
+                group: "hanhvi",
+                title: "Hai bàn khách cãi nhau, có nguy cơ xô xát",
+                summary: "Mâu thuẫn giữa các nhóm khách vì ồn ào, va chạm, nhìn nhau...",
+                tags: ["quan trọng", "mới"],
+                content: {
+                    background: "Tiệc nhậu buổi tối, khách đã uống nhiều",
+                    cause: "Va chạm nhỏ, ồn ào, hiểu lầm, rượu bia",
+                    steps: [
+                        "Báo ngay quản lý và bảo vệ, không để một nhân viên tự xử lý",
+                        "Tách hai nhóm: mời một bên sang khu vực khác, không đứng giữa hai người đang kích động",
+                        "Nói chuyện riêng với người bình tĩnh nhất mỗi bên",
+                        "Ngừng phục vụ rượu bia cho cả hai bàn",
+                        "Có ẩu đả, vũ khí hoặc đe dọa → gọi 113, đưa khách khác và nhân viên tránh xa",
+                        "Giữ lại camera, ghi nhận sự việc"
+                    ],
+                    speech: "\"Anh ơi, em mời bàn mình sang phòng bên này cho thoáng, em tặng bàn mình đĩa trái cây ạ.\"",
+                    avoid: ["Đứng chen vào giữa hai người đang đánh nhau", "Đứng về phía một bên", "Tiếp tục mang bia rượu ra"],
+                    responsible: "Quản lý ca / Bảo vệ",
+                    prevent: "Xếp các nhóm tiệc nhậu cách xa nhau; nhận biết sớm dấu hiệu căng thẳng; giới hạn rượu bia khi khách đã say"
+                }
+            },
+            {
+                id: 53,
+                group: "hanhvi",
+                title: "Khách tự ý vào khu bếp hoặc khu nhân viên",
+                summary: "Khách đi vào bếp để xem, tìm nhà vệ sinh, hoặc muốn nói chuyện với đầu bếp",
+                tags: ["trung bình", "mới"],
+                content: {
+                    background: "Bếp mở, cửa bếp gần nhà vệ sinh, khách quen",
+                    cause: "Biển báo không rõ, khách tò mò hoặc muốn khen/chê trực tiếp",
+                    steps: [
+                        "Đến gần nhẹ nhàng, hỏi khách cần hỗ trợ gì",
+                        "Giải thích ngắn gọn khu bếp có đồ nóng, dao, sàn trơn nên khách không vào được",
+                        "Đưa khách đến đúng nơi cần đến (nhà vệ sinh, quầy)",
+                        "Khách muốn gặp đầu bếp → mời đầu bếp ra bàn khi rảnh",
+                        "Kiểm tra lại khu bếp sau khi khách rời đi"
+                    ],
+                    speech: "\"Anh/chị cần tìm gì ạ? Khu bếp có nhiều đồ nóng nên em không dám mời anh/chị vào. Nhà vệ sinh ở phía bên này ạ.\"",
+                    avoid: ["Quát khách ra ngoài", "Để khách đứng trong bếp nói chuyện lâu", "Bỏ mặc vì là khách quen"],
+                    responsible: "Phục vụ / Bếp trưởng",
+                    prevent: "Biển \"Khu vực nhân viên\" rõ ràng; cửa bếp đóng; biển chỉ đường nhà vệ sinh dễ thấy"
+                }
+            },
+            {
+                id: 54,
+                group: "hanhvi",
+                title: "Khách quen đòi ưu đãi riêng hoặc xin ghi nợ",
+                summary: "Khách quen đòi giảm giá, tặng món, hoặc hẹn trả tiền lần sau",
+                tags: ["trung bình", "mới"],
+                content: {
+                    background: "Khách lâu năm, người quen của chủ hoặc quản lý",
+                    cause: "Nhà hàng không có chính sách khách thân thiết rõ ràng",
+                    steps: [
+                        "Cảm ơn khách đã ủng hộ lâu nay",
+                        "Nhân viên không tự quyết giảm giá hay ghi nợ → mời quản lý",
+                        "Áp dụng đúng chương trình khách thân thiết nếu có",
+                        "Quản lý đồng ý cho ghi nợ → ghi sổ có chữ ký, số tiền, ngày hẹn trả",
+                        "Từ chối → khéo léo, giữ thể diện cho khách"
+                    ],
+                    speech: "\"Dạ bên em luôn quý anh/chị đã ủng hộ lâu nay. Việc này em xin phép hỏi quản lý một chút ạ.\"",
+                    avoid: ["Tự ý giảm giá vì nể khách", "Từ chối thẳng thừng trước bạn bè của khách", "Cho ghi nợ không có giấy tờ"],
+                    responsible: "Quản lý ca / Chủ nhà hàng",
+                    prevent: "Chương trình tích điểm khách thân thiết rõ ràng; quy định ai được duyệt giảm giá và ghi nợ"
+                }
+            },
+
+            // --- An toàn & Khẩn cấp ---
+            {
+                id: 55,
+                group: "antoan",
+                title: "Khách bị mất cắp điện thoại, túi xách",
+                summary: "Khách phát hiện tài sản bị lấy trộm trong lúc dùng bữa",
+                tags: ["khẩn cấp", "mới"],
+                content: {
+                    background: "Bàn gần lối ra vào, giờ đông khách, khách treo túi sau ghế",
+                    cause: "Kẻ gian giả làm khách, người bán hàng rong, lợi dụng lúc đông",
+                    steps: [
+                        "Trấn an khách, hỏi rõ: đồ gì, để ở đâu, lần cuối thấy lúc nào",
+                        "Kiểm tra nhanh quanh bàn, nhà vệ sinh, sổ đồ thất lạc (có thể khách để quên)",
+                        "Báo quản lý, xem lại camera khu vực đó",
+                        "Hỗ trợ khách gọi điện thoại của mình (nếu mất điện thoại) để định vị hoặc khóa máy",
+                        "Hỗ trợ khách trình báo công an phường hoặc gọi 113, cung cấp đoạn camera khi được yêu cầu",
+                        "Không tự ý khám người hay đồ của khách khác"
+                    ],
+                    speech: "\"Anh/chị bình tĩnh, em kiểm tra cùng anh/chị ngay. Bên em có camera, quản lý sẽ xem lại và hỗ trợ anh/chị báo công an ạ.\"",
+                    avoid: ["Nói \"Nhà hàng không chịu trách nhiệm\" ngay từ đầu", "Tự ý khám xét khách khác", "Đăng hình nghi phạm lên mạng"],
+                    responsible: "Quản lý ca / Bảo vệ",
+                    prevent: "Móc treo túi dưới bàn; biển nhắc khách giữ tài sản; camera bao quát lối ra vào; không để người bán hàng rong vào khu bàn"
+                }
+            },
+            {
+                id: 56,
+                group: "antoan",
+                title: "Mưa bão, ngập nước, gió lớn",
+                summary: "Trời mưa to gió lớn, nước tràn vào, cây đổ, mái che có nguy cơ sập",
+                tags: ["khẩn cấp", "mới"],
+                content: {
+                    background: "Mùa mưa bão, khu vực trũng, quán có sân vườn và mái bạt",
+                    cause: "Thời tiết cực đoan, cống thoát nước tắc",
+                    steps: [
+                        "Đưa khách ở khu ngoài trời, dưới mái bạt, gần cây lớn vào trong nhà",
+                        "Nước tràn vào → ngắt điện khu vực bị ngập, không chạm vào thiết bị điện khi đứng trong nước",
+                        "Đặt biển cảnh báo sàn ướt, lót thảm ở lối vào",
+                        "Thu dọn biển hiệu, dù, bàn ghế ngoài trời có thể bị gió cuốn",
+                        "Khuyên khách chờ hết mưa to, hỗ trợ gọi taxi; không khuyến khích khách đi qua đường ngập sâu",
+                        "Có người bị thương hoặc mắc kẹt → gọi 114 hoặc 115"
+                    ],
+                    speech: "\"Mưa đang rất to, mời anh/chị vào trong ngồi cho an toàn ạ. Anh/chị cứ ngồi đợi hết mưa, em gọi taxi giúp khi anh/chị cần nhé.\"",
+                    avoid: ["Để khách ngồi dưới mái bạt hoặc gần cây lớn khi gió mạnh", "Lội nước để sửa ổ điện", "Giục khách về giữa lúc mưa bão"],
+                    responsible: "Quản lý ca / Toàn bộ nhân viên",
+                    prevent: "Theo dõi dự báo thời tiết; thông cống thoát nước định kỳ; gia cố mái che, biển hiệu; bao cát cho khu vực trũng"
+                }
+            },
+            {
+                id: 57,
+                group: "antoan",
+                title: "Phát hiện chuột, gián trước mặt khách",
+                summary: "Khách nhìn thấy chuột chạy qua, gián bò trên bàn hoặc tường",
+                tags: ["quan trọng", "mới"],
+                content: {
+                    background: "Buổi tối, khu gần bếp, gần thùng rác, sau mưa",
+                    cause: "Vệ sinh chưa đạt, rác chưa đổ kịp, kẽ hở ở tường và cống",
+                    steps: [
+                        "Xin lỗi chân thành, không chối hay nói \"Chắc từ bên ngoài vào\"",
+                        "Mời khách đổi sang bàn khác xa khu vực đó",
+                        "Kiểm tra thức ăn trên bàn; nghi bị côn trùng tiếp xúc → thay món mới",
+                        "Quản lý ra xin lỗi, có thể miễn hoặc giảm hóa đơn tùy mức độ",
+                        "Sau ca: kiểm tra toàn bộ khu vực, gọi đơn vị diệt côn trùng xử lý"
+                    ],
+                    speech: "\"Em thành thật xin lỗi anh/chị vì sự việc này. Em mời anh/chị sang bàn bên kia và thay toàn bộ món mới cho bàn mình ạ.\"",
+                    avoid: ["Đập chuột, gián trước mặt khách khác", "Nói \"Quán nào cũng có\"", "Chỉ xử lý qua loa rồi bỏ qua"],
+                    responsible: "Quản lý ca / Bếp trưởng",
+                    prevent: "Diệt côn trùng định kỳ; đổ rác cuối mỗi ca, thùng rác có nắp; bịt kín kẽ hở và lưới chắn cống"
+                }
+            },
+            {
+                id: 58,
+                group: "antoan",
+                title: "Khách lên cơn co giật",
+                summary: "Khách đột ngột co giật, ngã xuống, co cứng hoặc giật tay chân",
+                tags: ["khẩn cấp", "mới"],
+                content: {
+                    background: "Có thể do động kinh, sốt cao, hạ đường huyết, chấn thương đầu",
+                    cause: "Tình trạng sức khỏe của khách",
+                    steps: [
+                        "Giữ bình tĩnh, ghi lại thời điểm cơn bắt đầu",
+                        "Dọn bàn ghế, đồ cứng, vật sắc quanh khách; kê vật mềm dưới đầu",
+                        "KHÔNG giữ chặt tay chân, KHÔNG nhét bất cứ thứ gì vào miệng khách",
+                        "Gọi 115 nếu cơn kéo dài trên 5 phút, co giật lặp lại, khách bị thương, khó thở, mang thai hoặc lần đầu co giật",
+                        "Hết cơn → đặt khách nằm nghiêng an toàn, ở cạnh đến khi khách tỉnh hẳn",
+                        "Giải tán đám đông, giữ sự riêng tư cho khách"
+                    ],
+                    speech: "(Với người đi cùng) \"Anh/chị ấy có bệnh động kinh hay đang dùng thuốc gì không ạ? Em đã gọi cấp cứu, chúng ta ở bên cạnh bạn ấy nhé.\"",
+                    avoid: ["Nhét đũa, khăn, ngón tay vào miệng khách", "Ghì chặt tay chân khách", "Cho uống nước khi chưa tỉnh hẳn"],
+                    responsible: "Quản lý ca / Nhân viên được đào tạo sơ cứu",
+                    prevent: "Đào tạo sơ cứu co giật cho nhân viên; dán hướng dẫn sơ cứu và số 115 ở quầy"
+                }
+            },
+            {
+                id: 59,
+                group: "antoan",
+                title: "Đối tượng có hung khí, đe dọa cướp tài sản",
+                summary: "Người lạ cầm dao, vũ khí, đe dọa nhân viên hoặc khách để lấy tiền",
+                tags: ["khẩn cấp", "mới"],
+                content: {
+                    background: "Buổi tối muộn, gần giờ đóng cửa, khi két có nhiều tiền mặt",
+                    cause: "Hành vi phạm tội, có thể nhắm vào két tiền và tài sản khách",
+                    steps: [
+                        "Tính mạng là trên hết: KHÔNG chống trả, không giằng co",
+                        "Làm theo yêu cầu của đối tượng một cách chậm rãi, giữ tay trong tầm nhìn",
+                        "Không nhìn chằm chằm, không có hành động đột ngột",
+                        "Ghi nhớ đặc điểm: dáng người, quần áo, giọng nói, hướng chạy, phương tiện",
+                        "Khi đối tượng đã rời đi → gọi 113 ngay, khóa cửa, không đuổi theo",
+                        "Giữ nguyên hiện trường, không chạm vào đồ đối tượng đã cầm; hỗ trợ người bị thương, gọi 115"
+                    ],
+                    speech: "(Với khách sau sự việc) \"Mọi người an toàn rồi, chúng tôi đã báo công an. Xin mọi người ở lại chờ công an đến làm việc ạ.\"",
+                    avoid: ["Chống trả, giằng co hung khí", "Đuổi theo đối tượng", "Lau dọn hiện trường trước khi công an đến"],
+                    responsible: "Quản lý ca / Bảo vệ / Toàn bộ nhân viên",
+                    prevent: "Hạn chế tiền mặt trong két, nộp tiền giữa ca; camera ở quầy và lối ra; không để một nhân viên đóng cửa một mình"
+                }
+            },
+            {
+                id: 60,
+                group: "antoan",
+                title: "Khách bị kẹt trong thang máy",
+                summary: "Thang máy dừng giữa tầng, cửa không mở, khách mắc kẹt bên trong",
+                tags: ["khẩn cấp", "mới"],
+                content: {
+                    background: "Nhà hàng nhiều tầng, mất điện, thang quá tải",
+                    cause: "Sự cố kỹ thuật, mất điện, chở quá số người cho phép",
+                    steps: [
+                        "Nói chuyện với khách qua cửa hoặc chuông liên lạc, trấn an: đã có người đang xử lý",
+                        "Hướng dẫn khách không cố cạy cửa, không trèo ra ngoài, ngồi xuống chờ",
+                        "Gọi ngay đơn vị bảo trì thang máy theo số dán trong thang",
+                        "Có người khó thở, hoảng loạn, có trẻ em hoặc chờ quá lâu → gọi 114",
+                        "Không tự cứu hộ bằng chìa khóa cửa tầng nếu chưa được đào tạo",
+                        "Sau khi khách ra: hỏi thăm sức khỏe, cho nghỉ ngơi, ngừng dùng thang đến khi được kiểm tra"
+                    ],
+                    speech: "\"Anh/chị ơi, em đang ở ngay bên ngoài, đã gọi kỹ thuật và họ đang đến. Anh/chị ngồi xuống nghỉ, đừng cạy cửa nhé, em nói chuyện với anh/chị suốt ạ.\"",
+                    avoid: ["Tự cạy cửa thang máy", "Để khách một mình không ai liên lạc", "Cho thang chạy tiếp khi chưa kiểm tra"],
+                    responsible: "Quản lý ca / Kỹ thuật",
+                    prevent: "Bảo trì thang máy định kỳ; dán số đơn vị bảo trì trong thang; biển giới hạn số người; ưu tiên thang bộ khi mất điện"
+                }
+            },
+
+        ];
+
+        // ===== CẤU HÌNH NHÓM =====
+        const groups = {
+            phucvu:    { name: "Phục vụ & Tiếp nhận",       icon: "🧑‍🤝‍🧑", color: "bg-blue-100 text-blue-800",   border: "border-blue-400" },
+            chatluong: { name: "Chất lượng món & đồ uống",  icon: "🍽️", color: "bg-amber-100 text-amber-800", border: "border-amber-400" },
+            thanhtoan: { name: "Thanh toán & Giá",          icon: "💵", color: "bg-green-100 text-green-800", border: "border-green-500" },
+            hanhvi:    { name: "Hành vi khách",             icon: "😤", color: "bg-purple-100 text-purple-800", border: "border-purple-400" },
+            antoan:    { name: "An toàn & Khẩn cấp",        icon: "🚨", color: "bg-red-100 text-red-800",     border: "border-red-500" }
+        };
+
+        const tagColors = {
+            "khẩn cấp":   "bg-red-600 text-white",
+            "quan trọng": "bg-orange-100 text-orange-800",
+            "thường gặp": "bg-blue-100 text-blue-800",
+            "trung bình": "bg-gray-200 text-gray-700",
+            "mới":        "bg-accent text-white"
+        };
+
+        // ===== TIỆN ÍCH =====
+        // Bỏ dấu tiếng Việt để tìm kiếm không dấu
+        function normalize(str) {
+            return String(str)
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/đ/g, "d").replace(/Đ/g, "D")
+                .toLowerCase();
+        }
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        }
+
+        // Tô sáng từ khóa (so khớp không dấu nhưng giữ nguyên chữ gốc)
+        function highlight(text, keyword) {
+            const safe = escapeHtml(text);
+            if (!keyword) return safe;
+            const normText = normalize(safe);
+            const normKey = normalize(keyword);
+            const idx = normText.indexOf(normKey);
+            if (idx === -1) return safe;
+            return safe.slice(0, idx) + "<mark>" + safe.slice(idx, idx + normKey.length) + "</mark>" + safe.slice(idx + normKey.length);
+        }
+
+        // Tạo chuỗi tìm kiếm sẵn cho mỗi tình huống
+        situations.forEach(s => {
+            const c = s.content;
+            s._search = normalize([
+                s.title, s.summary, s.tags.join(" "), groups[s.group].name,
+                c.background, c.cause, c.steps.join(" "), c.speech, c.avoid.join(" "), c.responsible, c.prevent
+            ].join(" "));
+        });
+
+        // ===== TRẠNG THÁI =====
+        let currentGroup = "all";
+        let keyword = "";
+
+        const listEl = document.getElementById("situationList");
+        const noResultEl = document.getElementById("noResult");
+        const searchInput = document.getElementById("searchInput");
+        const clearBtn = document.getElementById("clearSearch");
+        const modal = document.getElementById("detailModal");
+        const modalTitle = document.getElementById("modalTitle");
+        const modalContent = document.getElementById("modalContent");
+
+        document.getElementById("totalCount").textContent = situations.length;
+
+        // Hiển thị số lượng trên nút lọc
+        document.querySelectorAll(".filter-btn").forEach(btn => {
+            const g = btn.dataset.group;
+            const count = g === "all" ? situations.length : situations.filter(s => s.group === g).length;
+            btn.insertAdjacentHTML("beforeend", ` <span class="count-badge ml-1 text-xs opacity-75">(${count})</span>`);
+        });
+
+        function updateFilterButtons() {
+            document.querySelectorAll(".filter-btn").forEach(btn => {
+                const active = btn.dataset.group === currentGroup;
+                btn.classList.toggle("bg-primary", active);
+                btn.classList.toggle("text-white", active);
+                btn.classList.toggle("shadow", active);
+                btn.classList.toggle("bg-gray-200", !active);
+                btn.classList.toggle("hover:bg-gray-300", !active);
+                btn.setAttribute("aria-pressed", active ? "true" : "false");
+            });
+        }
+
+        // ===== HIỂN THỊ DANH SÁCH =====
+        function render() {
+            const key = normalize(keyword.trim());
+            const filtered = situations.filter(s =>
+                (currentGroup === "all" || s.group === currentGroup) &&
+                (!key || s._search.includes(key))
+            );
+
+            document.getElementById("shownCount").textContent = filtered.length;
+            noResultEl.classList.toggle("hidden", filtered.length > 0);
+
+            listEl.innerHTML = filtered.map(s => {
+                const g = groups[s.group];
+                const tags = s.tags.map(t =>
+                    `<span class="tag ${tagColors[t] || "bg-gray-100 text-gray-700"}">${escapeHtml(t)}</span>`
+                ).join("");
+                return `
+                <article class="card-hover bg-white rounded-xl shadow-sm border-t-4 ${g.border} p-5 cursor-pointer flex flex-col focus:outline-none focus:ring-2 focus:ring-secondary"
+                    data-id="${s.id}" tabindex="0" role="button" aria-label="Xem chi tiết: ${escapeHtml(s.title)}">
+                    <div class="flex items-center justify-between mb-2 gap-2">
+                        <span class="tag ${g.color}">${g.icon} ${g.name}</span>
+                        <span class="text-xs text-gray-400">#${s.id}</span>
+                    </div>
+                    <h3 class="font-semibold text-lg leading-snug mb-2">${highlight(s.title, keyword.trim())}</h3>
+                    <p class="text-sm text-gray-600 mb-4 flex-1">${highlight(s.summary, keyword.trim())}</p>
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex flex-wrap gap-1">${tags}</div>
+                        <span class="text-primary text-sm font-medium whitespace-nowrap">Xem <i class="fa fa-angle-right"></i></span>
+                    </div>
+                </article>`;
+            }).join("");
+        }
+
+        // ===== CHI TIẾT (MODAL) =====
+        function section(icon, title, colorClass, body) {
+            return `
+            <section class="mb-5">
+                <h3 class="font-semibold mb-2 flex items-center gap-2 ${colorClass}">
+                    <i class="fa ${icon} w-5 text-center"></i>${title}
+                </h3>
+                ${body}
+            </section>`;
+        }
+
+        function openDetail(id) {
+            const s = situations.find(x => x.id === id);
+            if (!s) return;
+            const c = s.content;
+            const g = groups[s.group];
+
+            modalTitle.innerHTML = `<span class="text-sm font-normal text-gray-400 block mb-1">${g.icon} ${g.name} · #${s.id}</span>${escapeHtml(s.title)}`;
+
+            const emergency = s.group === "antoan" ? `
+                <div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-5 flex flex-wrap gap-x-6 gap-y-2 text-sm text-red-800">
+                    <span class="font-semibold"><i class="fa fa-phone mr-1"></i>Số khẩn cấp:</span>
+                    <span><b>113</b> Công an</span>
+                    <span><b>114</b> Cứu hỏa – Cứu nạn</span>
+                    <span><b>115</b> Cấp cứu y tế</span>
+                </div>` : "";
+
+            modalContent.innerHTML = `
+                ${emergency}
+                <div class="grid md:grid-cols-2 gap-4 mb-5">
+                    <div class="bg-gray-50 rounded-lg p-3">
+                        <p class="text-xs uppercase tracking-wide text-gray-500 mb-1"><i class="fa fa-clock-o mr-1"></i>Bối cảnh</p>
+                        <p class="text-sm">${escapeHtml(c.background)}</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-3">
+                        <p class="text-xs uppercase tracking-wide text-gray-500 mb-1"><i class="fa fa-question-circle mr-1"></i>Nguyên nhân</p>
+                        <p class="text-sm">${escapeHtml(c.cause)}</p>
+                    </div>
+                </div>
+
+                ${section("fa-list-ol", "Các bước xử lý", "text-dark", `
+                    <ol class="space-y-2">
+                        ${c.steps.map((st, i) => `
+                            <li class="flex gap-3">
+                                <span class="shrink-0 w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">${i + 1}</span>
+                                <span class="text-sm pt-0.5">${escapeHtml(st)}</span>
+                            </li>`).join("")}
+                    </ol>`)}
+
+                ${section("fa-comment", "Mẫu câu gợi ý", "text-accent", `
+                    <blockquote class="bg-green-50 border-l-4 border-accent p-3 rounded-r text-sm italic">${escapeHtml(c.speech)}</blockquote>`)}
+
+                ${section("fa-ban", "Tuyệt đối tránh", "text-primary", `
+                    <ul class="space-y-1">
+                        ${c.avoid.map(a => `<li class="text-sm flex gap-2"><i class="fa fa-times text-primary mt-1"></i><span>${escapeHtml(a)}</span></li>`).join("")}
+                    </ul>`)}
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="bg-blue-50 rounded-lg p-3">
+                        <p class="text-xs uppercase tracking-wide text-blue-600 mb-1"><i class="fa fa-user mr-1"></i>Người phụ trách</p>
+                        <p class="text-sm">${escapeHtml(c.responsible)}</p>
+                    </div>
+                    <div class="bg-amber-50 rounded-lg p-3">
+                        <p class="text-xs uppercase tracking-wide text-amber-700 mb-1"><i class="fa fa-shield mr-1"></i>Phòng ngừa</p>
+                        <p class="text-sm">${escapeHtml(c.prevent)}</p>
+                    </div>
+                </div>`;
+
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+            document.body.style.overflow = "hidden";
+            modal.querySelector(".overflow-y-auto").scrollTop = 0;
+            document.getElementById("closeModal").focus();
+        }
+
+        function closeDetail() {
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+            document.body.style.overflow = "";
+        }
+
+        // ===== SỰ KIỆN =====
+        document.getElementById("filterBar").addEventListener("click", e => {
+            const btn = e.target.closest(".filter-btn");
+            if (!btn) return;
+            currentGroup = btn.dataset.group;
+            updateFilterButtons();
+            render();
+        });
+
+        let searchTimer;
+        searchInput.addEventListener("input", () => {
+            clearTimeout(searchTimer);
+            clearBtn.classList.toggle("hidden", !searchInput.value);
+            searchTimer = setTimeout(() => {
+                keyword = searchInput.value;
+                render();
+            }, 150);
+        });
+
+        clearBtn.addEventListener("click", () => {
+            searchInput.value = "";
+            keyword = "";
+            clearBtn.classList.add("hidden");
+            render();
+            searchInput.focus();
+        });
+
+        listEl.addEventListener("click", e => {
+            const card = e.target.closest("[data-id]");
+            if (card) openDetail(Number(card.dataset.id));
+        });
+
+        listEl.addEventListener("keydown", e => {
+            if (e.key !== "Enter" && e.key !== " ") return;
+            const card = e.target.closest("[data-id]");
+            if (card) { e.preventDefault(); openDetail(Number(card.dataset.id)); }
+        });
+
+        document.getElementById("closeModal").addEventListener("click", closeDetail);
+        document.getElementById("printBtn").addEventListener("click", () => window.print());
+        modal.addEventListener("click", e => { if (e.target === modal) closeDetail(); });
+
+        document.addEventListener("keydown", e => {
+            if (e.key === "Escape" && !modal.classList.contains("hidden")) closeDetail();
+            // Phím "/" để nhảy nhanh vào ô tìm kiếm
+            if (e.key === "/" && document.activeElement !== searchInput && modal.classList.contains("hidden")) {
+                e.preventDefault();
+                searchInput.focus();
+            }
+        });
+
+        // ===== KHỞI ĐỘNG =====
+        updateFilterButtons();
+        render();
+    </script>
+</body>
+</html>
